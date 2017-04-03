@@ -1,0 +1,10 @@
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.Data\bin\Debug\OnlineMusicServices.Data.dll.config
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.Data\bin\Debug\OnlineMusicServices.Data.dll
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.Data\bin\Debug\OnlineMusicServices.Data.pdb
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.Data\bin\Debug\EntityFramework.dll
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.Data\bin\Debug\EntityFramework.SqlServer.dll
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.Data\bin\Debug\EntityFramework.xml
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.Data\bin\Debug\EntityFramework.SqlServer.xml
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.Data\obj\Debug\OnlineMusicServices.Data.dll
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.Data\obj\Debug\OnlineMusicServices.Data.pdb
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.Data\obj\Debug\OnlineMusicServices.Data.csprojResolveAssemblyReference.cache
