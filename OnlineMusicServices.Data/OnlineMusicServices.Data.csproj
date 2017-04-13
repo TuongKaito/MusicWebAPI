@@ -57,6 +57,9 @@
     <Compile Include="AlbumComment.cs">
       <DependentUpon>OnlineMusicDataModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="AlbumView.cs">
+      <DependentUpon>OnlineMusicDataModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Artist.cs">
       <DependentUpon>OnlineMusicDataModel.tt</DependentUpon>
     </Compile>
@@ -64,6 +67,9 @@
       <DependentUpon>OnlineMusicDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Lyric.cs">
+      <DependentUpon>OnlineMusicDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Notification.cs">
       <DependentUpon>OnlineMusicDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="OnlineMusicDataModel.Context.cs">
@@ -87,7 +93,16 @@
     <Compile Include="PlaylistComment.cs">
       <DependentUpon>OnlineMusicDataModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="PlaylistView.cs">
+      <DependentUpon>OnlineMusicDataModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RankingAlbum.cs">
+      <DependentUpon>OnlineMusicDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="RankingSong.cs">
+      <DependentUpon>OnlineMusicDataModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Resource.cs">
       <DependentUpon>OnlineMusicDataModel.tt</DependentUpon>
     </Compile>
@@ -101,6 +116,9 @@
       <DependentUpon>OnlineMusicDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="SongComment.cs">
+      <DependentUpon>OnlineMusicDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="SongView.cs">
       <DependentUpon>OnlineMusicDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="sysdiagram.cs">

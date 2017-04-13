@@ -41,7 +41,7 @@ namespace OnlineMusicServices.API.Models
         public DateTime ReleasedDate { get; set; }
 
         [DataMember]
-        public long Views { get; set; } = 0;
+        public long Views { get; set; }
 
         [DataMember]
         public string Photo { get; set; }
@@ -62,7 +62,6 @@ namespace OnlineMusicServices.API.Models
             GenreId = album.GenreId;
             ArtistId = album.ArtistId;
             ReleasedDate = album.ReleasedDate;
-            Views = album.Views;
             Photo = album.Photo;
             Genre = new GenreModel { Genre = album.Genre };
             Artist = new ArtistModel { Artist = album.Artist };

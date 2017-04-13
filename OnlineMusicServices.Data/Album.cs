@@ -18,6 +18,8 @@ namespace OnlineMusicServices.Data
         public Album()
         {
             this.AlbumComments = new HashSet<AlbumComment>();
+            this.AlbumViews = new HashSet<AlbumView>();
+            this.RankingAlbums = new HashSet<RankingAlbum>();
             this.Songs = new HashSet<Song>();
         }
     
@@ -27,7 +29,6 @@ namespace OnlineMusicServices.Data
         public int GenreId { get; set; }
         public int ArtistId { get; set; }
         public System.DateTime ReleasedDate { get; set; }
-        public long Views { get; set; }
         public string Photo { get; set; }
     
         public virtual Artist Artist { get; set; }
@@ -35,6 +36,10 @@ namespace OnlineMusicServices.Data
         public virtual Resource Resource { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<AlbumComment> AlbumComments { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<AlbumView> AlbumViews { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<RankingAlbum> RankingAlbums { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Song> Songs { get; set; }
     }

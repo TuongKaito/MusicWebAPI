@@ -33,7 +33,7 @@ namespace OnlineMusicServices.API.Models
         public UserModel User { get; set; }
 
         [DataMember]
-        public long Views { get; set; } = 0;
+        public long Views { get; set; }
 
         [DataMember]
         public string Photo { get; set; }
@@ -51,7 +51,6 @@ namespace OnlineMusicServices.API.Models
             Description = playlist.Description;
             CreatedDate = playlist.CreatedDate;
             UserId = playlist.UserId;
-            Views = playlist.Views;
             Photo = playlist.Photo;
         }
     }

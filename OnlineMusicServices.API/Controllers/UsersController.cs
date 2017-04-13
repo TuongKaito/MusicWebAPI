@@ -11,6 +11,7 @@ using OnlineMusicServices.API.Storage;
 using OnlineMusicServices.API.Utility;
 using System.Security.Claims;
 using OnlineMusicServices.API.DTO;
+using System.Collections.Generic;
 
 namespace OnlineMusicServices.API.Controllers
 {
@@ -19,6 +20,7 @@ namespace OnlineMusicServices.API.Controllers
     {
         GoogleDriveServices services;
         PlaylistDTO playlistDto;
+        SongDTO songDto;
         string domainHosting;
 
         public UsersController()
@@ -26,6 +28,7 @@ namespace OnlineMusicServices.API.Controllers
             services = new GoogleDriveServices(HttpContext.Current.Server.MapPath("~/"));
             Uri uri = HttpContext.Current.Request.Url;
             playlistDto = new PlaylistDTO(uri);
+            songDto = new SongDTO(uri);
             domainHosting = $"{uri.Scheme}://{uri.Authority}/api/resources/streaming/";
         }
 
@@ -97,7 +100,7 @@ namespace OnlineMusicServices.API.Controllers
                     return Request.CreateResponse(HttpStatusCode.OK, userInfo);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex.Message);
             }
@@ -121,8 +124,8 @@ namespace OnlineMusicServices.API.Controllers
             {
                 // Query artist in database and check artist is existed
                 var user = (from u in db.UserInfoes
-                              where u.Id == id
-                              select u).FirstOrDefault();
+                            where u.Id == id
+                            select u).FirstOrDefault();
                 if (user == null)
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Không tìm thấy user id=" + id);
@@ -182,7 +185,7 @@ namespace OnlineMusicServices.API.Controllers
                 }
             }
         }
-        
+
         [Route("{id}/playlists")]
         [HttpGet]
         public HttpResponseMessage GetPlaylists([FromUri] int id)
@@ -192,6 +195,161 @@ namespace OnlineMusicServices.API.Controllers
                 var query = playlistDto.GetPlaylistQuery(db, playlist => playlist.UserId == id);
                 var list = (from pl in query select pl).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, list);
+            }
+        }
+
+        [Authorize(Roles = "User")]
+        [Route("{id}/songs")]
+        [HttpGet]
+        public HttpResponseMessage GetMediaUploaded([FromUri] int id)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                var user = (from u in db.Users where u.Id == id select u).FirstOrDefault();
+                if (user == null)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Không tìm thấy user id=" + id);
+                }
+                var query = songDto.GetSongQuery(db, song => song.AuthorId == id);
+                var list = query.OrderByDescending(song => song.UploadedDate)
+                    .ThenBy(song => song.Verified)
+                    .ThenBy(song => song.Privacy).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, list);
+            }
+        }
+
+        [Authorize(Roles = "User")]
+        [Route("{userId}/songs/privacy")]
+        [HttpPut]
+        public HttpResponseMessage SetPrivacySongs([FromUri] int userId, [FromBody] List<SongModel> list)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                foreach(SongModel model in list)
+                {
+                    var song = (from s in db.Songs where s.Id == model.Id select s).FirstOrDefault();
+                    if (song != null)
+                    {
+                        song.Privacy = model.Privacy;
+                    }
+                    db.SaveChanges();
+                }
+                return Request.CreateResponse(HttpStatusCode.OK);
+            }
+        }
+
+        [Authorize(Roles = "User")]
+        [Route("{id}/notifications")]
+        [HttpGet]
+        public HttpResponseMessage GetNotifications([FromUri] int id)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                var list = (from ntf in db.Notifications
+                            where ntf.UserId == id
+                            orderby ntf.CreatedAt descending
+                            select new NotificationModel() { Notification = ntf }).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, list);
+            }
+        }
+
+        [Authorize(Roles = "User")]
+        [Route("{id}/notifications/marks")]
+        [HttpPut]
+        public HttpResponseMessage MarkNotifications([FromUri] int id, [FromBody] List<NotificationModel> list)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                var user = (from u in db.Users where u.Id == id select u).FirstOrDefault();
+                if (user == null)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Không tìm thấy user id=" + id);
+                }
+                foreach(var model in list)
+                {
+                    var notify = (from ntf in user.Notifications
+                                  where ntf.Id == model.Id
+                                  select ntf).FirstOrDefault();
+                    if (notify != null)
+                    {
+                        notify.IsMark = true;
+                    }
+                }
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK);
+            }
+        }
+
+        [Authorize(Roles = "User")]
+        [Route("{id}/notifications/{notificationId}/marks")]
+        [HttpPut]
+        public HttpResponseMessage MarkNotification([FromUri] int id, [FromUri] long notificationId)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                var user = (from u in db.Users where u.Id == id select u).FirstOrDefault();
+                if (user == null)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Không tìm thấy user id=" + id);
+                }
+                var notify = (from ntf in user.Notifications
+                                where ntf.Id == notificationId
+                                select ntf).FirstOrDefault();
+                if (notify != null)
+                {
+                    notify.IsMark = true;
+                    db.SaveChanges();
+                }
+                return Request.CreateResponse(HttpStatusCode.OK);
+            }
+        }
+
+        [Authorize(Roles = "User")]
+        [Route("{id}/notifications")]
+        [HttpDelete]
+        public HttpResponseMessage DeleteNotifications([FromUri] int id, [FromBody] List<NotificationModel> list)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                var user = (from u in db.Users where u.Id == id select u).FirstOrDefault();
+                if (user == null)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Không tìm thấy user id=" + id);
+                }
+                List<long> deletingId = (from model in list select model.Id).ToList();
+                var listNofity = (from ntf in user.Notifications
+                                where deletingId.Contains(ntf.Id)
+                                select ntf).ToList();
+                if (listNofity != null && listNofity.Count > 0)
+                {
+                    db.Notifications.RemoveRange(listNofity);
+                    db.SaveChanges();
+                }
+                return Request.CreateResponse(HttpStatusCode.OK);
+            }
+        }
+
+        [Authorize(Roles = "User")]
+        [Route("{id}/notifications/{notificationId}")]
+        [HttpDelete]
+        public HttpResponseMessage DeleteNotification([FromUri] int id, [FromUri] long notificationId)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                var user = (from u in db.Users where u.Id == id select u).FirstOrDefault();
+                if (user == null)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Không tìm thấy user id=" + id);
+                }
+                var notify = (from ntf in user.Notifications
+                              where ntf.Id == notificationId
+                              select ntf).FirstOrDefault();
+                if (notify != null)
+                {
+                    db.Notifications.Remove(notify);
+                    db.SaveChanges();
+                }
+                return Request.CreateResponse(HttpStatusCode.OK);
             }
         }
 
@@ -253,6 +411,26 @@ namespace OnlineMusicServices.API.Controllers
                 else
                 {
                     user.User1.Add(follower);
+
+                    Notification notification = (from ntf in db.Notifications where ntf.UserId == user.Id && ntf.Action == NotificationAction.USER_FOLLOW select ntf).FirstOrDefault();
+                    if (notification == null)
+                    {
+                        notification = new Notification()
+                        {
+                            Title = "Hệ thống",
+                            IsMark = false,
+                            UserId = user.Id,
+                            Action = NotificationAction.USER_FOLLOW
+                        };
+                        db.Notifications.Add(notification);
+                    }
+                    UserInfo info = (from i in db.UserInfoes where i.UserId == follower.Id select i).FirstOrDefault();
+                    string actor = info != null && !String.IsNullOrEmpty(info.FullName) ? info.FullName : follower.Username;
+                    int followerCount = user.User1.Count;
+                    if (followerCount > 1)
+                        actor += " và " + (followerCount - 1) + " người dùng khác"; 
+                    notification.Message = $"{actor} đang theo dõi bạn";
+                    notification.CreatedAt = DateTime.Now;
                 }
                 db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK);

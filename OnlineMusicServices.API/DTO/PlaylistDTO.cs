@@ -25,18 +25,23 @@ namespace OnlineMusicServices.API.DTO
             {
                 query = query.Where(whereClause);
             }
-            var playlistQuery = query.Select(pl => new PlaylistModel()
+            var playlistQuery = query.Select(Converter).AsQueryable();
+            return playlistQuery;
+        }
+
+        public PlaylistModel Converter(Playlist pl)
+        {
+            return new PlaylistModel()
             {
                 Id = pl.Id,
                 Title = pl.Title,
                 Description = pl.Description,
                 CreatedDate = pl.CreatedDate,
                 UserId = pl.UserId,
-                Views = pl.Views,
+                Views = (from v in pl.PlaylistViews select v.Views).FirstOrDefault(),
                 Photo = DomainHosting + pl.Photo,
                 User = new UserModel { User = pl.User }
-            });
-            return playlistQuery;
+            };
         }
     }
 }

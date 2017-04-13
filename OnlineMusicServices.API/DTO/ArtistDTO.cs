@@ -23,7 +23,19 @@ namespace OnlineMusicServices.API.DTO
             {
                 query = query.Where(whereClause);
             }
-            IQueryable<ArtistModel> queryArtists = query.Select(a => new ArtistModel()
+            IQueryable<ArtistModel> queryArtists = query.Select(Converter).AsQueryable();
+            return queryArtists;
+        }
+
+        public ICollection<ArtistModel> ConvertToArtistModel(ICollection<Artist> artists)
+        {
+            var artistList = artists.Select(Converter).ToList();
+            return artistList;
+        }
+
+        public ArtistModel Converter(Artist a)
+        {
+            return new ArtistModel()
             {
                 Id = a.Id,
                 FullName = a.FullName,
@@ -36,8 +48,7 @@ namespace OnlineMusicServices.API.DTO
                 Photo = DomainHosting + a.Photo,
                 Verified = a.Verified,
                 Followers = a.Users.Count
-            });
-            return queryArtists;
+            };
         }
     }
 }

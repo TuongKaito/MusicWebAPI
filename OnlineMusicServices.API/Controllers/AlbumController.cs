@@ -20,12 +20,15 @@ namespace OnlineMusicServices.API.Controllers
         GoogleDriveServices services;
         AlbumDTO dto;
         SongDTO songDto;
+        RankingAlbumDTO rankingAlbumDto;
 
         public AlbumController()
         {
             services = new GoogleDriveServices(HttpContext.Current.Server.MapPath("~/"));
-            dto = new AlbumDTO(HttpContext.Current.Request.Url);
-            songDto = new SongDTO(HttpContext.Current.Request.Url);
+            Uri uri = HttpContext.Current.Request.Url;
+            dto = new AlbumDTO(uri);
+            songDto = new SongDTO(uri);
+            rankingAlbumDto = new RankingAlbumDTO(uri);
         }
 
         #region Album Services
@@ -63,7 +66,7 @@ namespace OnlineMusicServices.API.Controllers
         {
             using (var db = new OnlineMusicEntities())
             {
-                var query = dto.GetAlbumQuery(db);
+                var query = dto.GetAlbumQuery(db, album => album.Songs.Count > 0);
                 var listAlbums = query.OrderBy(a => a.Title).Skip((page - 1) * size).Take(size).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, listAlbums);
             }
@@ -92,6 +95,64 @@ namespace OnlineMusicServices.API.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, listAlbums);
             }
         }
+
+        #region Ranking Album
+
+        [Route("ranking")]
+        [HttpGet]
+        public HttpResponseMessage GetAllRankingSongs()
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                var rankingList = rankingAlbumDto.GetQueryRanking(db).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, rankingList);
+            }
+        }
+
+        [Route("ranking/{year}/{week}")]
+        [HttpGet]
+        public HttpResponseMessage GetRankingSongs([FromUri] int year, [FromUri] int week)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                var rankingList = rankingAlbumDto.GetQueryRanking(db, r => r.StartDate.Year == year && r.Week == week).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, rankingList);
+            }
+        }
+
+        [Route("ranking/{year}/{month}/{day}")]
+        [HttpGet]
+        public HttpResponseMessage GetRankingSongs([FromUri] int year, [FromUri] int month, [FromUri] int day)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                DateTime rankingDate = new DateTime(year, month, day);
+                var rankingList = rankingAlbumDto.GetQueryRanking(db , r => r.StartDate.Date.Equals(rankingDate.Date)).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, rankingList);
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [Route("ranking/{year}/{month}/{day}")]
+        [HttpPut]
+        public HttpResponseMessage UpdateRanking([FromUri] int year, [FromUri] int month, [FromUri] int day)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                try
+                {
+                    DateTime updateDate = new DateTime(year, month, day);
+                    db.UpdateAlbumRanking(updateDate);
+                    return Request.CreateResponse(HttpStatusCode.OK);
+                }
+                catch (Exception e)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, e.Message);
+                }
+            }
+        }
+
+        #endregion Ranking Album
 
         [Authorize(Roles = "Admin")]
         [Route("")]
@@ -219,7 +280,7 @@ namespace OnlineMusicServices.API.Controllers
         /// </summary>
         /// <param name="id">Id of album need to increase</param>
         /// <returns></returns>
-        [Route("{id}/increaseView")]
+        [Route("{id}/increase-view")]
         [HttpPut]
         public HttpResponseMessage IncreaseView([FromUri] int id)
         {
@@ -232,8 +293,35 @@ namespace OnlineMusicServices.API.Controllers
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Không tìm thấy album id=" + id);
                 }
-                album.Views++;
-                db.SaveChanges();
+                else if (album.Songs.Count > 0)
+                {
+                    var views = (from v in db.AlbumViews where v.AlbumId == id select v).FirstOrDefault();
+                    // Create new if song hasn't view yet
+                    if (views == null)
+                    {
+                        views = new AlbumView() { Ip = "", AlbumId = id, Timestamp = DateTime.Now, Views = 0 };
+                        db.AlbumViews.Add(views);
+                    }
+                    else
+                    {
+                        // Reset view hour
+                        if (views.Timestamp.Date.CompareTo(DateTime.Now.Date) != 0 || views.Timestamp.Hour != DateTime.Now.Hour)
+                        {
+                            views.Ip = "";
+                            views.Timestamp = DateTime.Now;
+                        }
+                    }
+
+                    string ip = HttpContext.Current.Request.UserHostAddress.Trim();
+                    // If IP hasn't view yet then increase view of song
+                    if (!views.Ip.Contains(ip))
+                    {
+                        views.Ip += " " + ip;
+                        views.Views++;
+                    }
+
+                    db.SaveChanges();
+                }
                 return Request.CreateResponse(HttpStatusCode.OK);
             }
         }
@@ -283,7 +371,7 @@ namespace OnlineMusicServices.API.Controllers
         [Authorize(Roles = "Admin")]
         [Route("{id}/songs")]
         [HttpPut]
-        public HttpResponseMessage AddSongToAlbum([FromUri] int id, [FromBody] ICollection<SongModel> listSongs)
+        public HttpResponseMessage AddSongToAlbum([FromUri] int id, [FromBody] ICollection<SongModel> listSongs, bool notify = false)
         {
             using (var db = new OnlineMusicEntities())
             {
@@ -309,6 +397,38 @@ namespace OnlineMusicServices.API.Controllers
                     return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Danh sách bài hát không hợp lệ");
                 }
                 db.SaveChanges();
+
+                //Push notification
+                if (notify)
+                {
+                    try
+                    {
+                        List<Notification> notifications = new List<Notification>();
+                        foreach(User user in album.Artist.Users)
+                        {
+                            Notification notification = new Notification()
+                            {
+                                Title = "Hệ thống",
+                                Message = $"{album.Artist.FullName} ra mắt album {album.Title}",
+                                CreatedAt = DateTime.Now,
+                                IsMark = false,
+                                UserId = user.Id,
+                                Action = NotificationAction.ALBUM_RELEASED
+                            };
+                            notifications.Add(notification);
+                        }
+                        if (notifications.Count > 0)
+                        {
+                            db.Notifications.AddRange(notifications);
+                            db.SaveChanges();
+                        }
+                    }
+                    catch
+                    {
+
+                    }
+                }
+
                 return Request.CreateResponse(HttpStatusCode.OK);
             }
         }
@@ -346,6 +466,7 @@ namespace OnlineMusicServices.API.Controllers
             {
                 var listComments = (from c in db.AlbumComments
                                     where c.AlbumId == id
+                                    orderby c.Date descending
                                     select new CommentAlbumModel() { AlbumComment = c, User = new UserModel { User = c.User } }).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, listComments);
             }
@@ -356,7 +477,7 @@ namespace OnlineMusicServices.API.Controllers
         [HttpPost]
         public HttpResponseMessage AddCommentToAlbum([FromUri] int id, [FromBody] CommentAlbumModel commentModel)
         {
-            if (commentModel.AlbumId != id)
+            if (commentModel.DataId != id)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Dữ liệu không phù hợp");
             }
@@ -370,7 +491,8 @@ namespace OnlineMusicServices.API.Controllers
                 commentModel = (from c in db.AlbumComments
                                 where c.Id == comment.Id
                                 select new CommentAlbumModel() { AlbumComment = c, User = new UserModel { User = c.User } }).SingleOrDefault();
-                return Request.CreateResponse(HttpStatusCode.OK, commentModel);
+                
+                return Request.CreateResponse(HttpStatusCode.Created, commentModel);
             }
         }
 
@@ -379,7 +501,7 @@ namespace OnlineMusicServices.API.Controllers
         [HttpPut]
         public HttpResponseMessage EditComment([FromUri] int id, [FromBody] CommentAlbumModel commentModel)
         {
-            if (commentModel.AlbumId != id)
+            if (commentModel.DataId != id)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Dữ liệu không phù hợp");
             }

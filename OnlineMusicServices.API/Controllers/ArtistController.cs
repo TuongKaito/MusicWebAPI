@@ -299,7 +299,7 @@ namespace OnlineMusicServices.API.Controllers
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Không tìm thấy nghệ sĩ id=" + id);
                 }
-                ICollection<SongModel> listSongs = songDto.ConvertToSongModel(artist.Songs.OrderByDescending(s => s.Views).ToList());
+                ICollection<SongModel> listSongs = songDto.ConvertToSongModel(artist.Songs.ToList()).OrderByDescending(s => s.Views).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, listSongs);
             }
         }

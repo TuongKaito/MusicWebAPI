@@ -8,13 +8,8 @@ using System.Web;
 
 namespace OnlineMusicServices.API.Models
 {
-    [DataContract]
     public class CommentAlbumModel : CommentBaseModel<AlbumComment>
     {
-        [Required]
-        [DataMember]
-        public int AlbumId { get; set; }
-
         public AlbumComment AlbumComment
         {
             set
@@ -29,14 +24,14 @@ namespace OnlineMusicServices.API.Models
             Comment = albumComment.Comment;
             Date = albumComment.Date;
             UserId = albumComment.UserId;
-            AlbumId = albumComment.AlbumId;
+            DataId = albumComment.AlbumId;
         }
 
         public override void UpdateEntity(AlbumComment albumComment)
         {
             albumComment.Comment = Comment;
             albumComment.UserId = UserId;
-            albumComment.AlbumId = AlbumId;
+            albumComment.AlbumId = (int)DataId;
         }
     }
 }

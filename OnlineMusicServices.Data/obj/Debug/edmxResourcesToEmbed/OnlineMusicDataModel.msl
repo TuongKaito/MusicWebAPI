@@ -10,7 +10,6 @@
           <ScalarProperty Name="GenreId" ColumnName="GenreId" />
           <ScalarProperty Name="ArtistId" ColumnName="ArtistId" />
           <ScalarProperty Name="ReleasedDate" ColumnName="ReleasedDate" />
-          <ScalarProperty Name="Views" ColumnName="Views" />
           <ScalarProperty Name="Photo" ColumnName="Photo" />
         </MappingFragment>
       </EntityTypeMapping>
@@ -26,12 +25,23 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
+    <EntitySetMapping Name="AlbumViews">
+      <EntityTypeMapping TypeName="OnlineMusicModel.AlbumView">
+        <MappingFragment StoreEntitySet="AlbumViews">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="AlbumId" ColumnName="AlbumId" />
+          <ScalarProperty Name="Ip" ColumnName="Ip" />
+          <ScalarProperty Name="Timestamp" ColumnName="Timestamp" />
+          <ScalarProperty Name="Views" ColumnName="Views" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
     <EntitySetMapping Name="Artists">
       <EntityTypeMapping TypeName="OnlineMusicModel.Artist">
         <MappingFragment StoreEntitySet="Artist">
-          <ScalarProperty Name="GenreId" ColumnName="GenreId" />
           <ScalarProperty Name="Id" ColumnName="Id" />
           <ScalarProperty Name="FullName" ColumnName="FullName" />
+          <ScalarProperty Name="GenreId" ColumnName="GenreId" />
           <ScalarProperty Name="Gender" ColumnName="Gender" />
           <ScalarProperty Name="DateOfBirth" ColumnName="DateOfBirth" />
           <ScalarProperty Name="City" ColumnName="City" />
@@ -61,6 +71,19 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
+    <EntitySetMapping Name="Notifications">
+      <EntityTypeMapping TypeName="OnlineMusicModel.Notification">
+        <MappingFragment StoreEntitySet="Notification">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Title" ColumnName="Title" />
+          <ScalarProperty Name="Message" ColumnName="Message" />
+          <ScalarProperty Name="UserId" ColumnName="UserId" />
+          <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+          <ScalarProperty Name="IsMark" ColumnName="IsMark" />
+          <ScalarProperty Name="Action" ColumnName="Action" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
     <EntitySetMapping Name="Playlists">
       <EntityTypeMapping TypeName="OnlineMusicModel.Playlist">
         <MappingFragment StoreEntitySet="Playlist">
@@ -69,7 +92,6 @@
           <ScalarProperty Name="Description" ColumnName="Description" />
           <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
           <ScalarProperty Name="UserId" ColumnName="UserId" />
-          <ScalarProperty Name="Views" ColumnName="Views" />
           <ScalarProperty Name="Photo" ColumnName="Photo" />
         </MappingFragment>
       </EntityTypeMapping>
@@ -82,6 +104,43 @@
           <ScalarProperty Name="Date" ColumnName="Date" />
           <ScalarProperty Name="UserId" ColumnName="UserId" />
           <ScalarProperty Name="PlaylistId" ColumnName="PlaylistId" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="PlaylistViews">
+      <EntityTypeMapping TypeName="OnlineMusicModel.PlaylistView">
+        <MappingFragment StoreEntitySet="PlaylistViews">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="PlaylistId" ColumnName="PlaylistId" />
+          <ScalarProperty Name="Ip" ColumnName="Ip" />
+          <ScalarProperty Name="Timestamp" ColumnName="Timestamp" />
+          <ScalarProperty Name="Views" ColumnName="Views" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="RankingAlbums">
+      <EntityTypeMapping TypeName="OnlineMusicModel.RankingAlbum">
+        <MappingFragment StoreEntitySet="RankingAlbum">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="AlbumId" ColumnName="AlbumId" />
+          <ScalarProperty Name="Week" ColumnName="Week" />
+          <ScalarProperty Name="Rank" ColumnName="Rank" />
+          <ScalarProperty Name="LastRank" ColumnName="LastRank" />
+          <ScalarProperty Name="StartDate" ColumnName="StartDate" />
+          <ScalarProperty Name="EndDate" ColumnName="EndDate" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="RankingSongs">
+      <EntityTypeMapping TypeName="OnlineMusicModel.RankingSong">
+        <MappingFragment StoreEntitySet="RankingSong">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="SongId" ColumnName="SongId" />
+          <ScalarProperty Name="Week" ColumnName="Week" />
+          <ScalarProperty Name="Rank" ColumnName="Rank" />
+          <ScalarProperty Name="LastRank" ColumnName="LastRank" />
+          <ScalarProperty Name="StartDate" ColumnName="StartDate" />
+          <ScalarProperty Name="EndDate" ColumnName="EndDate" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -120,7 +179,6 @@
           <ScalarProperty Name="Composer" ColumnName="Composer" />
           <ScalarProperty Name="ResourceId" ColumnName="ResourceId" />
           <ScalarProperty Name="UploadedDate" ColumnName="UploadedDate" />
-          <ScalarProperty Name="Views" ColumnName="Views" />
           <ScalarProperty Name="Verified" ColumnName="Verified" />
           <ScalarProperty Name="Privacy" ColumnName="Privacy" />
         </MappingFragment>
@@ -134,6 +192,17 @@
           <ScalarProperty Name="Date" ColumnName="Date" />
           <ScalarProperty Name="UserId" ColumnName="UserId" />
           <ScalarProperty Name="SongId" ColumnName="SongId" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="SongViews">
+      <EntityTypeMapping TypeName="OnlineMusicModel.SongView">
+        <MappingFragment StoreEntitySet="SongViews">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="SongId" ColumnName="SongId" />
+          <ScalarProperty Name="Ip" ColumnName="Ip" />
+          <ScalarProperty Name="Timestamp" ColumnName="Timestamp" />
+          <ScalarProperty Name="Views" ColumnName="Views" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -213,5 +282,7 @@
         <ScalarProperty Name="Id" ColumnName="SongId" />
       </EndProperty>
     </AssociationSetMapping>
+    <FunctionImportMapping FunctionImportName="UpdateAlbumRanking" FunctionName="OnlineMusicModel.Store.UpdateAlbumRanking" />
+    <FunctionImportMapping FunctionImportName="UpdateSongRanking" FunctionName="OnlineMusicModel.Store.UpdateSongRanking" />
   </EntityContainerMapping>
 </Mapping>

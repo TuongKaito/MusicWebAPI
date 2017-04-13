@@ -213,7 +213,7 @@ namespace OnlineMusicServices.API.Controllers
 
                 playlistModel.UpdateEntity(playlist);
                 db.SaveChanges();
-                playlistModel = query.Where(a => a.Id == playlist.Id).FirstOrDefault();
+                playlistModel = query.Where(pl => pl.Id == playlist.Id).FirstOrDefault();
                 return Request.CreateResponse(HttpStatusCode.OK, playlistModel);
             }
         }
@@ -223,7 +223,7 @@ namespace OnlineMusicServices.API.Controllers
         /// </summary>
         /// <param name="id">Id of playlist need to increase</param>
         /// <returns></returns>
-        [Route("{id}/increaseView")]
+        [Route("{id}/increase-view")]
         [HttpPut]
         public HttpResponseMessage IncreaseView([FromUri] int id)
         {
@@ -236,8 +236,35 @@ namespace OnlineMusicServices.API.Controllers
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Không tìm thấy playlist id=" + id);
                 }
-                playlist.Views++;
-                db.SaveChanges();
+                else if (playlist.Songs.Count > 0)
+                {
+                    var views = (from v in db.PlaylistViews where v.PlaylistId == id select v).FirstOrDefault();
+                    // Create new if song hasn't view yet
+                    if (views == null)
+                    {
+                        views = new PlaylistView() { Ip = "", PlaylistId = id, Timestamp = DateTime.Now, Views = 0 };
+                        db.PlaylistViews.Add(views);
+                    }
+                    else
+                    {
+                        // Reset view every hour
+                        if (views.Timestamp.Date.CompareTo(DateTime.Now.Date) != 0 || views.Timestamp.Hour != DateTime.Now.Hour)
+                        {
+                            views.Ip = "";
+                            views.Timestamp = DateTime.Now;
+                        }
+                    }
+
+                    string ip = HttpContext.Current.Request.UserHostAddress.Trim();
+                    // If IP hasn't view yet then increase view of song
+                    if (!views.Ip.Contains(ip))
+                    {
+                        views.Ip += " " + ip;
+                        views.Views++;
+                    }
+
+                    db.SaveChanges();
+                }
                 return Request.CreateResponse(HttpStatusCode.OK);
             }
         }
@@ -363,6 +390,7 @@ namespace OnlineMusicServices.API.Controllers
             {
                 var listComments = (from c in db.PlaylistComments
                                     where c.PlaylistId == id
+                                    orderby c.Date descending
                                     select new CommentPlaylistModel() { PlaylistComment = c, User = new UserModel { User = c.User } }).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, listComments);
             }
@@ -373,7 +401,7 @@ namespace OnlineMusicServices.API.Controllers
         [HttpPost]
         public HttpResponseMessage AddCommentToPlaylist([FromUri] int id, [FromBody] CommentPlaylistModel commentModel)
         {
-            if (commentModel.PlaylistId != id)
+            if (commentModel.DataId != id)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Dữ liệu không phù hợp");
             }
@@ -387,7 +415,41 @@ namespace OnlineMusicServices.API.Controllers
                 commentModel = (from c in db.PlaylistComments
                                 where c.Id == comment.Id
                                 select new CommentPlaylistModel() { PlaylistComment = c, User = new UserModel { User = c.User } }).SingleOrDefault();
-                return Request.CreateResponse(HttpStatusCode.OK, commentModel);
+
+                // Push notification
+                try
+                {
+                    Playlist playlist = (from pl in db.Playlists where pl.Id == id select pl).FirstOrDefault();
+                    if (playlist != null && comment.UserId != playlist.UserId)
+                    {
+                        string action = NotificationAction.COMMENT_PLAYLIST + "_" + playlist.Id;
+                        Notification notification = (from ntf in db.Notifications where ntf.UserId == playlist.UserId && ntf.Action == action select ntf).FirstOrDefault();
+                        if (notification == null)
+                        {
+                            notification = new Notification()
+                            {
+                                Title = "Hệ thống",
+                                IsMark = false,
+                                Action = action,
+                                UserId = playlist.UserId
+                            };
+                            db.Notifications.Add(notification);
+                        }
+                        UserInfo info = (from i in db.UserInfoes where i.UserId == commentModel.UserId select i).FirstOrDefault();
+                        string actor = info != null && !String.IsNullOrEmpty(info.FullName) ? info.FullName : commentModel.User?.Username;
+                        long commentCount = playlist.PlaylistComments.Select(c => c.UserId).Distinct().Count();
+                        if (commentCount > 1)
+                            actor += " và " + (commentCount - 1) + " người khác";
+                        notification.Message = $"{actor} đã comment vào playlist " + playlist.Title + " của bạn";
+                        notification.CreatedAt = DateTime.Now;
+                        db.SaveChanges();
+                    }
+                }
+                catch
+                {
+
+                }
+                return Request.CreateResponse(HttpStatusCode.Created, commentModel);
             }
         }
 
@@ -396,7 +458,7 @@ namespace OnlineMusicServices.API.Controllers
         [HttpPut]
         public HttpResponseMessage EditComment([FromUri] int id, [FromBody] CommentPlaylistModel commentModel)
         {
-            if (commentModel.PlaylistId != id)
+            if (commentModel.DataId != id)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Dữ liệu không phù hợp");
             }

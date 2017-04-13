@@ -9,11 +9,13 @@ namespace OnlineMusicServices.API.DTO
 {
     public class AlbumDTO
     {
+        private ArtistDTO artistDto;
         public string DomainHosting { get; set; }
 
         public AlbumDTO(Uri uri)
         {
             DomainHosting = $"{uri.Scheme}://{uri.Authority}/api/resources/streaming/";
+            artistDto = new ArtistDTO(uri);
         }
 
         public IQueryable<AlbumModel> GetAlbumQuery(OnlineMusicEntities db, System.Linq.Expressions.Expression<Func<Album, bool>> whereClause = null)
@@ -24,7 +26,19 @@ namespace OnlineMusicServices.API.DTO
                 query = query.Where(whereClause);
             }
 
-            var albumQuery = query.Select(a => new AlbumModel()
+            var albumQuery = query.Select(Converter).AsQueryable();
+            return albumQuery;
+        }
+
+        public ICollection<AlbumModel> ConvertToAlbumModel(ICollection<Album> albumList)
+        {
+            var list = albumList.Select(Converter).ToList();
+            return list;
+        }
+
+        public AlbumModel Converter(Album a)
+        {
+            return new AlbumModel()
             {
                 Id = a.Id,
                 Title = a.Title,
@@ -32,12 +46,11 @@ namespace OnlineMusicServices.API.DTO
                 GenreId = a.GenreId,
                 Genre = new GenreModel { Genre = a.Genre },
                 ArtistId = a.ArtistId,
-                Artist = new ArtistModel { Artist = a.Artist, Photo = DomainHosting + a.Artist.Photo, Followers = a.Artist.Users.Count, Genre = new GenreModel { Genre = a.Artist.Genre } },
+                Artist = artistDto.Converter(a.Artist),
                 ReleasedDate = a.ReleasedDate,
-                Views = a.Views,
+                Views = (from v in a.AlbumViews select v.Views).FirstOrDefault(),
                 Photo = DomainHosting + a.Photo
-            });
-            return albumQuery;
+            };
         }
     }
 }

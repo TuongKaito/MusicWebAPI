@@ -20,11 +20,14 @@ namespace OnlineMusicServices.API.Controllers
     {
         GoogleDriveServices services;
         SongDTO dto;
+        RankingSongDTO rankingSongDto;
 
         public SongController()
         {
             services = new GoogleDriveServices(HttpContext.Current.Server.MapPath("~/"));
-            dto = new SongDTO(HttpContext.Current.Request.Url);
+            Uri uri = HttpContext.Current.Request.Url;
+            dto = new SongDTO(uri);
+            rankingSongDto = new RankingSongDTO(uri);
         }
 
         #region Song Services
@@ -65,7 +68,7 @@ namespace OnlineMusicServices.API.Controllers
         /// <returns></returns>
         [Route("")]
         [HttpGet]
-        public HttpResponseMessage GetAllSongsVerified(bool verified, string type = "audio")
+        public HttpResponseMessage GetAllSongsVerified(bool verified, bool privacy = false, string type = "audio")
         {
             using (var db = new OnlineMusicEntities())
             {
@@ -83,7 +86,7 @@ namespace OnlineMusicServices.API.Controllers
                     return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Resource type not supported");
                 }
                 ICollection<SongModel> listSongs;
-                listSongs = query.Where(s => s.Verified == verified && !String.IsNullOrEmpty(s.ResourceId)).ToList();
+                listSongs = query.Where(s => s.Verified == verified && s.Privacy == privacy && !String.IsNullOrEmpty(s.ResourceId)).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, listSongs);
             }
         }
@@ -96,7 +99,7 @@ namespace OnlineMusicServices.API.Controllers
         /// <returns></returns>
         [Route("pager")]
         [HttpGet]
-        public HttpResponseMessage GetPagingSongs(int page = 1, int size = 200, bool verified = true, string type = "audio")
+        public HttpResponseMessage GetPagingSongs(int page = 1, int size = 200, bool verified = true, bool privacy = false, string type = "audio")
         {
             using (var db = new OnlineMusicEntities())
             {
@@ -113,8 +116,8 @@ namespace OnlineMusicServices.API.Controllers
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Resource type not supported");
                 }
-                var listSongs = query.Where(s => !String.IsNullOrEmpty(s.ResourceId) && s.Verified == verified)
-                                     .OrderByDescending(s => s.Title)
+                var listSongs = query.Where(s => !String.IsNullOrEmpty(s.ResourceId) && s.Verified == verified && s.Privacy == privacy)
+                                     .OrderBy(s => s.Title)
                                      .Skip((page - 1) * size).Take(size).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, listSongs);
             }
@@ -139,7 +142,7 @@ namespace OnlineMusicServices.API.Controllers
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Resource type not supported");
                 }
-                var listSongs = query.Where(s => !String.IsNullOrEmpty(s.ResourceId) && s.Verified == true)
+                var listSongs = query.Where(s => !String.IsNullOrEmpty(s.ResourceId) && s.Verified == true && s.Privacy == false)
                                      .OrderByDescending(s => s.UploadedDate)
                                      .Skip((page - 1) * size)
                                      .Take(size).ToList();
@@ -166,7 +169,7 @@ namespace OnlineMusicServices.API.Controllers
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Resource type not supported");
                 }
-                var listSongs = query.Where(s => !String.IsNullOrEmpty(s.ResourceId) && s.Verified == true)
+                var listSongs = query.Where(s => !String.IsNullOrEmpty(s.ResourceId) && s.Verified == true && s.Privacy == false)
                                      .OrderByDescending(s => s.Views)
                                      .Skip((page - 1) * size)
                                      .Take(size).ToList();
@@ -235,15 +238,19 @@ namespace OnlineMusicServices.API.Controllers
                             var fileName = song.Title + ext;
                             ResourceTypeManager resourceType = Media.GetResourceType(ext);
                             string folderId;
+                            string message;
+
                             if (resourceType == ResourceTypeManager.Video)
                             {
                                 folderId = services.SearchFolder(song.User.Username, GoogleDriveServices.VIDEOS) ??
                                     services.CreateFolder(song.User.Username, GoogleDriveServices.VIDEOS);
+                                message = $"{song.User.Username} vừa upload video mới";
                             }
                             else
                             {
                                 folderId = services.SearchFolder(song.User.Username, GoogleDriveServices.MUSICS) ??
                                     services.CreateFolder(song.User.Username, GoogleDriveServices.MUSICS);
+                                message = $"{song.User.Username} vừa upload bài hát mới";
                             }
 
                             // Photo will upload in Musics/{username}/{fileName}
@@ -269,6 +276,35 @@ namespace OnlineMusicServices.API.Controllers
                                 song.ResourceId = resourceId;
                                 db.SaveChanges();
                                 transaction.Commit();
+
+                                try
+                                {
+                                    List<Notification> notifications = new List<Notification>();
+                                    foreach (User user in song.User.User1)
+                                    {
+                                        Notification notification = new Notification()
+                                        {
+                                            Title = "Thông báo từ người dùng",
+                                            Message = message,
+                                            CreatedAt = DateTime.Now,
+                                            UserId = user.Id,
+                                            IsMark = false,
+                                            Action = NotificationAction.UPLOAD
+                                        };
+                                        notifications.Add(notification);
+                                    }
+                                    if (notifications.Count > 0)
+                                    {
+                                        db.Notifications.AddRange(notifications);
+                                        db.SaveChanges();
+                                        transaction.Commit();
+                                    }
+                                }
+                                catch
+                                {
+
+                                }
+
                                 return Request.CreateResponse(HttpStatusCode.OK, String.Format("Upload media {0} thành công", song.Title));
                             }
                             #endregion Upload file to drive
@@ -329,7 +365,7 @@ namespace OnlineMusicServices.API.Controllers
                         songModel.UpdateEntity(song);
                         song.UploadedDate = DateTime.Now;
                         song.Verified = false;
-                        song.Privacy = true;
+                        song.Privacy = false;
                         db.Songs.Add(song);
                         db.SaveChanges();
                         transaction.Commit();
@@ -389,7 +425,56 @@ namespace OnlineMusicServices.API.Controllers
             }
         }
 
-        [Route("{id}/increaseView")]
+        [Authorize(Roles = "Admin")]
+        [Route("verify")]
+        [HttpPut]
+        public HttpResponseMessage VerifySongs([FromBody] List<SongModel> list)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                foreach(SongModel model in list)
+                {
+                    Song song = (from s in db.Songs where s.Id == model.Id select s).FirstOrDefault();
+                    if (song != null && song.Verified != model.Verified)
+                    {
+                        song.Verified = model.Verified;
+                        db.SaveChanges();
+
+                        if (song.Verified)
+                        {
+                            try
+                            {
+                                // Push notification
+                                string action = NotificationAction.VERIFIED_MEDIA + "_" + song.Id;
+                                Notification notification = (from ntf in db.Notifications where ntf.UserId == song.AuthorId select ntf).FirstOrDefault();
+                                if (notification == null)
+                                {
+                                    notification = new Notification()
+                                    {
+                                        Title = "Hệ thống đã kiểm duyệt",
+                                        Message = song.Resource.Type == (int)ResourceTypeManager.Audio ? "Bài hát " : "Video " + song.Title +
+                                        " của bạn đã được kiểm duyệt thành công",
+                                        IsMark = false,
+                                        UserId = song.AuthorId,
+                                        CreatedAt = DateTime.Now,
+                                        Action = action
+                                    };
+                                    db.Notifications.Add(notification);
+                                    db.SaveChanges();
+                                }
+                            }
+                            catch
+                            {
+
+                            }
+                        }
+                    }
+                }
+                return Request.CreateResponse(HttpStatusCode.OK);
+            }
+        }
+
+        [Route("{id}/increase-view")]
         [HttpPut]
         public HttpResponseMessage IncreaseView([FromUri] long id)
         {
@@ -402,13 +487,95 @@ namespace OnlineMusicServices.API.Controllers
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Không tìm thấy media id=" + id);
                 }
-                song.Views++;
+                var views = (from v in db.SongViews where v.SongId == id select v).FirstOrDefault();
+                // Create new if song hasn't view yet
+                if (views == null)
+                {
+                    views = new SongView() { Ip = "", SongId = id, Timestamp = DateTime.Now, Views = 0 };
+                    db.SongViews.Add(views);
+                }
+                else
+                {
+                    // Reset view every hour
+                    if (views.Timestamp.Date.CompareTo(DateTime.Now.Date) != 0 || views.Timestamp.Hour != DateTime.Now.Hour)
+                    {
+                        views.Ip = "";
+                        views.Timestamp = DateTime.Now;
+                    }
+                }
+
+                string ip = HttpContext.Current.Request.UserHostAddress.Trim();
+                // If IP hasn't view yet then increase view of song
+                if (!views.Ip.Contains(ip))
+                {
+                    views.Ip += " " + ip;
+                    views.Views++;
+                }
+
                 db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK);
             }
         }
 
         #endregion Song Services
+
+        #region Ranking Song
+
+        [Route("ranking")]
+        [HttpGet]
+        public HttpResponseMessage GetAllRankingSongs()
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                var rankingList = rankingSongDto.GetRankingQuery(db).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, rankingList);
+            }
+        }
+
+        [Route("ranking/{year}/{week}")]
+        [HttpGet]
+        public HttpResponseMessage GetRankingSongs([FromUri] int year, [FromUri] int week)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                var rankingList = rankingSongDto.GetRankingQuery(db, r => r.StartDate.Year == year && r.Week == week).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, rankingList);
+            }
+        }
+
+        [Route("ranking/{year}/{month}/{day}")]
+        [HttpGet]
+        public HttpResponseMessage GetRankingSongs([FromUri] int year, [FromUri] int month, [FromUri] int day)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                DateTime rankingDate = new DateTime(year, month, day);
+                var rankingList = rankingSongDto.GetRankingQuery(db, r => r.StartDate.Date.Equals(rankingDate.Date)).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, rankingList);
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [Route("ranking/{year}/{month}/{day}")]
+        [HttpPut]
+        public HttpResponseMessage UpdateRanking([FromUri] int year, [FromUri] int month, [FromUri] int day)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                try
+                {
+                    DateTime updateDate = new DateTime(year, month, day);
+                    db.UpdateSongRanking(updateDate);
+                    return Request.CreateResponse(HttpStatusCode.OK);
+                }
+                catch (Exception e)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, e.InnerException.Message);
+                }
+            }
+        }
+
+        #endregion Ranking Song
 
         #region Lyrics of Song
         [Route("{id}/lyrics")]
@@ -458,9 +625,8 @@ namespace OnlineMusicServices.API.Controllers
                     lyricModel.UpdateEntity(lyric);
                     db.Lyrics.Add(lyric);
                     db.SaveChanges();
-
-                    var songModel = query.Where(s => s.Id == song.Id).FirstOrDefault();
-                    return Request.CreateResponse(HttpStatusCode.Created, songModel);
+                    
+                    return Request.CreateResponse(HttpStatusCode.Created);
                 }
                 else
                 {
@@ -495,9 +661,7 @@ namespace OnlineMusicServices.API.Controllers
                 lyric.Verified = lyricModel.Verified;
                 db.SaveChanges();
                 
-                // Update lyric model to response
-                lyricModel = new LyricModel() { LyricEntity = lyric };
-                return Request.CreateResponse(HttpStatusCode.OK, lyricModel);
+                return Request.CreateResponse(HttpStatusCode.OK);
             }
         }
 
@@ -533,12 +697,13 @@ namespace OnlineMusicServices.API.Controllers
 
         [Route("{id}/comments")]
         [HttpGet]
-        public HttpResponseMessage GetCommentsOfSong([FromUri] int id)
+        public HttpResponseMessage GetCommentsOfSong([FromUri] long id)
         {
             using (var db = new OnlineMusicEntities())
             {
                 var listComments = (from c in db.SongComments
                                     where c.SongId == id
+                                    orderby c.Date descending
                                     select new CommentSongModel() { SongComment = c, User = new UserModel { User = c.User } }).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, listComments);
             }
@@ -547,9 +712,9 @@ namespace OnlineMusicServices.API.Controllers
         [Authorize(Roles = "User")]
         [Route("{id}/comments")]
         [HttpPost]
-        public HttpResponseMessage AddCommentToSong([FromUri] int id, [FromBody] CommentSongModel commentModel)
+        public HttpResponseMessage AddCommentToSong([FromUri] long id, [FromBody] CommentSongModel commentModel)
         {
-            if (commentModel.SongId != id)
+            if (commentModel.DataId != id)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Dữ liệu không phù hợp");
             }
@@ -560,19 +725,53 @@ namespace OnlineMusicServices.API.Controllers
                 comment.Date = DateTime.Now;
                 db.SongComments.Add(comment);
                 db.SaveChanges();
+
                 commentModel = (from c in db.SongComments
                                 where c.Id == comment.Id
                                 select new CommentSongModel() { SongComment = c, User = new UserModel { User = c.User } }).SingleOrDefault();
-                return Request.CreateResponse(HttpStatusCode.OK, commentModel);
+                try
+                {
+                    Song song = (from s in db.Songs where s.Id == id select s).FirstOrDefault();
+                    if (song != null && song.AuthorId != comment.UserId)
+                    {
+                        string action = NotificationAction.COMMENT_AUDIO + "_" + song.Id;
+                        Notification notification = (from ntf in db.Notifications where ntf.UserId == song.AuthorId && ntf.Action == action select ntf).FirstOrDefault();
+                        if (notification == null)
+                        {
+                            notification = new Notification()
+                            {
+                                Title = "Hệ thống",
+                                IsMark = false,
+                                Action = action,
+                                UserId = song.AuthorId
+                            };
+                            db.Notifications.Add(notification);
+                        }
+                        UserInfo info = (from i in db.UserInfoes where i.UserId == commentModel.UserId select i).FirstOrDefault();
+                        string actor = info != null && !String.IsNullOrEmpty(info.FullName) ? info.FullName : commentModel.User?.Username;
+                        long commentCount = song.SongComments.Select(c => c.UserId).Distinct().Count();
+                        if (commentCount > 1)
+                            actor += " và " + (commentCount - 1) + " người khác";
+                        notification.Message = $"{actor} đã comment vào" +
+                            (song.Resource.Type == (int)ResourceTypeManager.Audio ? " bài hát " : " video ") + song.Title + " của bạn";
+                        notification.CreatedAt = DateTime.Now;
+                        db.SaveChanges();
+                    }
+                }
+                catch
+                {
+                }
+
+                return Request.CreateResponse(HttpStatusCode.Created, commentModel);
             }
         }
 
         [Authorize(Roles = "User")]
         [Route("{id}/comments")]
         [HttpPut]
-        public HttpResponseMessage EditComment([FromUri] int id, [FromBody] CommentSongModel commentModel)
+        public HttpResponseMessage EditComment([FromUri] long id, [FromBody] CommentSongModel commentModel)
         {
-            if (commentModel.SongId != id)
+            if (commentModel.DataId != id)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Dữ liệu không phù hợp");
             }
@@ -597,7 +796,7 @@ namespace OnlineMusicServices.API.Controllers
         [Authorize(Roles = "User")]
         [Route("{songId}/comments/{commentId}")]
         [HttpDelete]
-        public HttpResponseMessage DeleteComment([FromUri] int songId, [FromUri] long commentId)
+        public HttpResponseMessage DeleteComment([FromUri] long songId, [FromUri] long commentId)
         {
             using (var db = new OnlineMusicEntities())
             {

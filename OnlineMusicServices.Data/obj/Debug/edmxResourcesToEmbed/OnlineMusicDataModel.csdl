@@ -10,12 +10,13 @@
     <Property Name="GenreId" Type="Int32" Nullable="false" />
     <Property Name="ArtistId" Type="Int32" Nullable="false" />
     <Property Name="ReleasedDate" Type="DateTime" Nullable="false" Precision="0" />
-    <Property Name="Views" Type="Int64" Nullable="false" />
     <Property Name="Photo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
     <NavigationProperty Name="Artist" Relationship="Self.FK_Album_Artist" FromRole="Album" ToRole="Artist" />
     <NavigationProperty Name="Genre" Relationship="Self.FK_Album_Genre" FromRole="Album" ToRole="Genre" />
     <NavigationProperty Name="Resource" Relationship="Self.FK_Album_Resource" FromRole="Album" ToRole="Resource" />
     <NavigationProperty Name="AlbumComments" Relationship="Self.FK_AlbumComments_Album" FromRole="Album" ToRole="AlbumComments" />
+    <NavigationProperty Name="AlbumViews" Relationship="Self.FK_AlbumViews_Album" FromRole="Album" ToRole="AlbumViews" />
+    <NavigationProperty Name="RankingAlbums" Relationship="Self.FK_RankingAlbum_Album" FromRole="Album" ToRole="RankingAlbum" />
     <NavigationProperty Name="Songs" Relationship="Self.AlbumSongs" FromRole="Album" ToRole="Song" />
   </EntityType>
   <EntityType Name="AlbumComment">
@@ -30,12 +31,24 @@
     <NavigationProperty Name="Album" Relationship="Self.FK_AlbumComments_Album" FromRole="AlbumComments" ToRole="Album" />
     <NavigationProperty Name="User" Relationship="Self.FK_AlbumComments_User" FromRole="AlbumComments" ToRole="User" />
   </EntityType>
+  <EntityType Name="AlbumView">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="AlbumId" Type="Int32" Nullable="false" />
+    <Property Name="Ip" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Timestamp" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="Views" Type="Int64" Nullable="false" />
+    <NavigationProperty Name="Album" Relationship="Self.FK_AlbumViews_Album" FromRole="AlbumViews" ToRole="Album" />
+  </EntityType>
   <EntityType Name="Artist">
     <Key>
       <PropertyRef Name="Id" />
     </Key>
     <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="FullName" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+    <Property Name="GenreId" Type="Int32" Nullable="false" />
     <Property Name="Gender" Type="Int32" />
     <Property Name="DateOfBirth" Type="DateTime" Precision="0" />
     <Property Name="City" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
@@ -43,11 +56,10 @@
     <Property Name="Verified" Type="Boolean" Nullable="false" />
     <Property Name="Photo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
     <NavigationProperty Name="Albums" Relationship="Self.FK_Album_Artist" FromRole="Artist" ToRole="Album" />
+    <NavigationProperty Name="Genre" Relationship="Self.FK_Artist_Genre" FromRole="Artist" ToRole="Genre" />
     <NavigationProperty Name="Resource" Relationship="Self.FK_Artist_Resource" FromRole="Artist" ToRole="Resource" />
     <NavigationProperty Name="Users" Relationship="Self.FollowerArtist" FromRole="Artist" ToRole="User" />
     <NavigationProperty Name="Songs" Relationship="Self.SongArtists" FromRole="Artist" ToRole="Song" />
-    <Property Name="GenreId" Type="Int32" Nullable="false" />
-    <NavigationProperty Name="Genre" Relationship="OnlineMusicModel.FK_Artist_Genre" FromRole="Artist" ToRole="Genre" />
   </EntityType>
   <EntityType Name="Genre">
     <Key>
@@ -57,8 +69,8 @@
     <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
     <Property Name="Category" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
     <NavigationProperty Name="Albums" Relationship="Self.FK_Album_Genre" FromRole="Genre" ToRole="Album" />
+    <NavigationProperty Name="Artists" Relationship="Self.FK_Artist_Genre" FromRole="Genre" ToRole="Artist" />
     <NavigationProperty Name="Songs" Relationship="Self.FK_Song_Genre" FromRole="Genre" ToRole="Song" />
-    <NavigationProperty Name="Artists" Relationship="OnlineMusicModel.FK_Artist_Genre" FromRole="Genre" ToRole="Artist" />
   </EntityType>
   <EntityType Name="Lyric">
     <Key>
@@ -72,6 +84,19 @@
     <NavigationProperty Name="Song" Relationship="Self.FK_Lyrics_Song" FromRole="Lyrics" ToRole="Song" />
     <NavigationProperty Name="User" Relationship="Self.FK_Lyrics_User" FromRole="Lyrics" ToRole="User" />
   </EntityType>
+  <EntityType Name="Notification">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Title" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
+    <Property Name="Message" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+    <Property Name="UserId" Type="Int32" Nullable="false" />
+    <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="IsMark" Type="Boolean" Nullable="false" />
+    <Property Name="Action" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+    <NavigationProperty Name="User" Relationship="Self.FK_Notification_User" FromRole="Notification" ToRole="User" />
+  </EntityType>
   <EntityType Name="Playlist">
     <Key>
       <PropertyRef Name="Id" />
@@ -81,10 +106,10 @@
     <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
     <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="0" />
     <Property Name="UserId" Type="Int32" Nullable="false" />
-    <Property Name="Views" Type="Int64" Nullable="false" />
     <Property Name="Photo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
     <NavigationProperty Name="User" Relationship="Self.FK_Playlist_User" FromRole="Playlist" ToRole="User" />
     <NavigationProperty Name="PlaylistComments" Relationship="Self.FK_PlaylistComments_Playlist" FromRole="Playlist" ToRole="PlaylistComments" />
+    <NavigationProperty Name="PlaylistViews" Relationship="Self.FK_PlaylistViews_Playlist" FromRole="Playlist" ToRole="PlaylistViews" />
     <NavigationProperty Name="Songs" Relationship="Self.PlaylistSongs" FromRole="Playlist" ToRole="Song" />
   </EntityType>
   <EntityType Name="PlaylistComment">
@@ -98,6 +123,43 @@
     <Property Name="PlaylistId" Type="Int32" Nullable="false" />
     <NavigationProperty Name="Playlist" Relationship="Self.FK_PlaylistComments_Playlist" FromRole="PlaylistComments" ToRole="Playlist" />
     <NavigationProperty Name="User" Relationship="Self.FK_PlaylistComments_User" FromRole="PlaylistComments" ToRole="User" />
+  </EntityType>
+  <EntityType Name="PlaylistView">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="PlaylistId" Type="Int32" Nullable="false" />
+    <Property Name="Ip" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Timestamp" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="Views" Type="Int64" Nullable="false" />
+    <NavigationProperty Name="Playlist" Relationship="Self.FK_PlaylistViews_Playlist" FromRole="PlaylistViews" ToRole="Playlist" />
+  </EntityType>
+  <EntityType Name="RankingAlbum">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="AlbumId" Type="Int32" Nullable="false" />
+    <Property Name="Week" Type="Int32" Nullable="false" />
+    <Property Name="Rank" Type="Int32" Nullable="false" />
+    <Property Name="LastRank" Type="Int32" Nullable="false" />
+    <Property Name="StartDate" Type="DateTime" Nullable="false" Precision="0" />
+    <Property Name="EndDate" Type="DateTime" Nullable="false" Precision="0" />
+    <NavigationProperty Name="Album" Relationship="Self.FK_RankingAlbum_Album" FromRole="RankingAlbum" ToRole="Album" />
+  </EntityType>
+  <EntityType Name="RankingSong">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="SongId" Type="Int64" Nullable="false" />
+    <Property Name="Week" Type="Int32" Nullable="false" />
+    <Property Name="Rank" Type="Int32" Nullable="false" />
+    <Property Name="LastRank" Type="Int32" Nullable="false" />
+    <Property Name="StartDate" Type="DateTime" Nullable="false" Precision="0" />
+    <Property Name="EndDate" Type="DateTime" Nullable="false" Precision="0" />
+    <NavigationProperty Name="Song" Relationship="Self.FK_RankingSong_Song" FromRole="RankingSong" ToRole="Song" />
   </EntityType>
   <EntityType Name="Resource">
     <Key>
@@ -139,14 +201,15 @@
     <Property Name="Composer" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
     <Property Name="ResourceId" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
     <Property Name="UploadedDate" Type="DateTime" Nullable="false" Precision="3" />
-    <Property Name="Views" Type="Int64" Nullable="false" />
     <Property Name="Verified" Type="Boolean" Nullable="false" />
     <Property Name="Privacy" Type="Boolean" Nullable="false" />
     <NavigationProperty Name="Genre" Relationship="Self.FK_Song_Genre" FromRole="Song" ToRole="Genre" />
     <NavigationProperty Name="Lyrics" Relationship="Self.FK_Lyrics_Song" FromRole="Song" ToRole="Lyrics" />
+    <NavigationProperty Name="RankingSongs" Relationship="Self.FK_RankingSong_Song" FromRole="Song" ToRole="RankingSong" />
     <NavigationProperty Name="Resource" Relationship="Self.FK_Song_Resource" FromRole="Song" ToRole="Resource" />
     <NavigationProperty Name="User" Relationship="Self.FK_Song_User" FromRole="Song" ToRole="User" />
     <NavigationProperty Name="SongComments" Relationship="Self.FK_SongComments_Song" FromRole="Song" ToRole="SongComments" />
+    <NavigationProperty Name="SongViews" Relationship="Self.FK_SongViews_Song" FromRole="Song" ToRole="SongViews" />
     <NavigationProperty Name="Albums" Relationship="Self.AlbumSongs" FromRole="Song" ToRole="Album" />
     <NavigationProperty Name="Playlists" Relationship="Self.PlaylistSongs" FromRole="Song" ToRole="Playlist" />
     <NavigationProperty Name="Artists" Relationship="Self.SongArtists" FromRole="Song" ToRole="Artist" />
@@ -162,6 +225,17 @@
     <Property Name="SongId" Type="Int64" Nullable="false" />
     <NavigationProperty Name="Song" Relationship="Self.FK_SongComments_Song" FromRole="SongComments" ToRole="Song" />
     <NavigationProperty Name="User" Relationship="Self.FK_SongComments_User" FromRole="SongComments" ToRole="User" />
+  </EntityType>
+  <EntityType Name="SongView">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="SongId" Type="Int64" Nullable="false" />
+    <Property Name="Ip" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Timestamp" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="Views" Type="Int64" Nullable="false" />
+    <NavigationProperty Name="Song" Relationship="Self.FK_SongViews_Song" FromRole="SongViews" ToRole="Song" />
   </EntityType>
   <EntityType Name="sysdiagram">
     <Key>
@@ -185,6 +259,7 @@
     <Property Name="Blocked" Type="Boolean" Nullable="false" />
     <NavigationProperty Name="AlbumComments" Relationship="Self.FK_AlbumComments_User" FromRole="User" ToRole="AlbumComments" />
     <NavigationProperty Name="Lyrics" Relationship="Self.FK_Lyrics_User" FromRole="User" ToRole="Lyrics" />
+    <NavigationProperty Name="Notifications" Relationship="Self.FK_Notification_User" FromRole="User" ToRole="Notification" />
     <NavigationProperty Name="Playlists" Relationship="Self.FK_Playlist_User" FromRole="User" ToRole="Playlist" />
     <NavigationProperty Name="PlaylistComments" Relationship="Self.FK_PlaylistComments_User" FromRole="User" ToRole="PlaylistComments" />
     <NavigationProperty Name="Role" Relationship="Self.FK_User_Role" FromRole="User" ToRole="Role" />
@@ -259,6 +334,30 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Association Name="FK_AlbumViews_Album">
+    <End Role="Album" Type="Self.Album" Multiplicity="1" />
+    <End Role="AlbumViews" Type="Self.AlbumView" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Album">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="AlbumViews">
+        <PropertyRef Name="AlbumId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_RankingAlbum_Album">
+    <End Role="Album" Type="Self.Album" Multiplicity="1" />
+    <End Role="RankingAlbum" Type="Self.RankingAlbum" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Album">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="RankingAlbum">
+        <PropertyRef Name="AlbumId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
   <Association Name="FK_AlbumComments_User">
     <End Role="User" Type="Self.User" Multiplicity="1">
       <OnDelete Action="Cascade" />
@@ -270,6 +369,18 @@
       </Principal>
       <Dependent Role="AlbumComments">
         <PropertyRef Name="UserId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Artist_Genre">
+    <End Role="Genre" Type="Self.Genre" Multiplicity="1" />
+    <End Role="Artist" Type="Self.Artist" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Genre">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Artist">
+        <PropertyRef Name="GenreId" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
@@ -323,10 +434,22 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
-  <Association Name="FK_Playlist_User">
+  <Association Name="FK_Notification_User">
     <End Role="User" Type="Self.User" Multiplicity="1">
       <OnDelete Action="Cascade" />
     </End>
+    <End Role="Notification" Type="Self.Notification" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="User">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Notification">
+        <PropertyRef Name="UserId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Playlist_User">
+    <End Role="User" Type="Self.User" Multiplicity="1" />
     <End Role="Playlist" Type="Self.Playlist" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="User">
@@ -351,6 +474,18 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Association Name="FK_PlaylistViews_Playlist">
+    <End Role="Playlist" Type="Self.Playlist" Multiplicity="1" />
+    <End Role="PlaylistViews" Type="Self.PlaylistView" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Playlist">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="PlaylistViews">
+        <PropertyRef Name="PlaylistId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
   <Association Name="FK_PlaylistComments_User">
     <End Role="User" Type="Self.User" Multiplicity="1" />
     <End Role="PlaylistComments" Type="Self.PlaylistComment" Multiplicity="*" />
@@ -360,6 +495,18 @@
       </Principal>
       <Dependent Role="PlaylistComments">
         <PropertyRef Name="UserId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_RankingSong_Song">
+    <End Role="Song" Type="Self.Song" Multiplicity="1" />
+    <End Role="RankingSong" Type="Self.RankingSong" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Song">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="RankingSong">
+        <PropertyRef Name="SongId" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
@@ -437,6 +584,18 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Association Name="FK_SongViews_Song">
+    <End Role="Song" Type="Self.Song" Multiplicity="1" />
+    <End Role="SongViews" Type="Self.SongView" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Song">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="SongViews">
+        <PropertyRef Name="SongId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
   <Association Name="FK_SongComments_User">
     <End Role="User" Type="Self.User" Multiplicity="1">
       <OnDelete Action="Cascade" />
@@ -488,16 +647,22 @@
   <EntityContainer Name="OnlineMusicEntities" annotation:LazyLoadingEnabled="true">
     <EntitySet Name="Albums" EntityType="Self.Album" />
     <EntitySet Name="AlbumComments" EntityType="Self.AlbumComment" />
+    <EntitySet Name="AlbumViews" EntityType="Self.AlbumView" />
     <EntitySet Name="Artists" EntityType="Self.Artist" />
     <EntitySet Name="Genres" EntityType="Self.Genre" />
     <EntitySet Name="Lyrics" EntityType="Self.Lyric" />
+    <EntitySet Name="Notifications" EntityType="Self.Notification" />
     <EntitySet Name="Playlists" EntityType="Self.Playlist" />
     <EntitySet Name="PlaylistComments" EntityType="Self.PlaylistComment" />
+    <EntitySet Name="PlaylistViews" EntityType="Self.PlaylistView" />
+    <EntitySet Name="RankingAlbums" EntityType="Self.RankingAlbum" />
+    <EntitySet Name="RankingSongs" EntityType="Self.RankingSong" />
     <EntitySet Name="Resources" EntityType="Self.Resource" />
     <EntitySet Name="ResourceTypes" EntityType="Self.ResourceType" />
     <EntitySet Name="Roles" EntityType="Self.Role" />
     <EntitySet Name="Songs" EntityType="Self.Song" />
     <EntitySet Name="SongComments" EntityType="Self.SongComment" />
+    <EntitySet Name="SongViews" EntityType="Self.SongView" />
     <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagram" />
     <EntitySet Name="Users" EntityType="Self.User" />
     <EntitySet Name="UserInfoes" EntityType="Self.UserInfo" />
@@ -517,9 +682,21 @@
       <End Role="Album" EntitySet="Albums" />
       <End Role="AlbumComments" EntitySet="AlbumComments" />
     </AssociationSet>
+    <AssociationSet Name="FK_AlbumViews_Album" Association="Self.FK_AlbumViews_Album">
+      <End Role="Album" EntitySet="Albums" />
+      <End Role="AlbumViews" EntitySet="AlbumViews" />
+    </AssociationSet>
+    <AssociationSet Name="FK_RankingAlbum_Album" Association="Self.FK_RankingAlbum_Album">
+      <End Role="Album" EntitySet="Albums" />
+      <End Role="RankingAlbum" EntitySet="RankingAlbums" />
+    </AssociationSet>
     <AssociationSet Name="FK_AlbumComments_User" Association="Self.FK_AlbumComments_User">
       <End Role="User" EntitySet="Users" />
       <End Role="AlbumComments" EntitySet="AlbumComments" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Artist_Genre" Association="Self.FK_Artist_Genre">
+      <End Role="Genre" EntitySet="Genres" />
+      <End Role="Artist" EntitySet="Artists" />
     </AssociationSet>
     <AssociationSet Name="FK_Artist_Resource" Association="Self.FK_Artist_Resource">
       <End Role="Resource" EntitySet="Resources" />
@@ -537,6 +714,10 @@
       <End Role="User" EntitySet="Users" />
       <End Role="Lyrics" EntitySet="Lyrics" />
     </AssociationSet>
+    <AssociationSet Name="FK_Notification_User" Association="Self.FK_Notification_User">
+      <End Role="User" EntitySet="Users" />
+      <End Role="Notification" EntitySet="Notifications" />
+    </AssociationSet>
     <AssociationSet Name="FK_Playlist_User" Association="Self.FK_Playlist_User">
       <End Role="User" EntitySet="Users" />
       <End Role="Playlist" EntitySet="Playlists" />
@@ -545,9 +726,17 @@
       <End Role="Playlist" EntitySet="Playlists" />
       <End Role="PlaylistComments" EntitySet="PlaylistComments" />
     </AssociationSet>
+    <AssociationSet Name="FK_PlaylistViews_Playlist" Association="Self.FK_PlaylistViews_Playlist">
+      <End Role="Playlist" EntitySet="Playlists" />
+      <End Role="PlaylistViews" EntitySet="PlaylistViews" />
+    </AssociationSet>
     <AssociationSet Name="FK_PlaylistComments_User" Association="Self.FK_PlaylistComments_User">
       <End Role="User" EntitySet="Users" />
       <End Role="PlaylistComments" EntitySet="PlaylistComments" />
+    </AssociationSet>
+    <AssociationSet Name="FK_RankingSong_Song" Association="Self.FK_RankingSong_Song">
+      <End Role="Song" EntitySet="Songs" />
+      <End Role="RankingSong" EntitySet="RankingSongs" />
     </AssociationSet>
     <AssociationSet Name="FK_Resource_ResourceType" Association="Self.FK_Resource_ResourceType">
       <End Role="ResourceType" EntitySet="ResourceTypes" />
@@ -572,6 +761,10 @@
     <AssociationSet Name="FK_SongComments_Song" Association="Self.FK_SongComments_Song">
       <End Role="Song" EntitySet="Songs" />
       <End Role="SongComments" EntitySet="SongComments" />
+    </AssociationSet>
+    <AssociationSet Name="FK_SongViews_Song" Association="Self.FK_SongViews_Song">
+      <End Role="Song" EntitySet="Songs" />
+      <End Role="SongViews" EntitySet="SongViews" />
     </AssociationSet>
     <AssociationSet Name="FK_SongComments_User" Association="Self.FK_SongComments_User">
       <End Role="User" EntitySet="Users" />
@@ -601,21 +794,11 @@
       <End Role="Artist" EntitySet="Artists" />
       <End Role="Song" EntitySet="Songs" />
     </AssociationSet>
-    <AssociationSet Name="FK_Artist_Genre" Association="OnlineMusicModel.FK_Artist_Genre">
-      <End Role="Genre" EntitySet="Genres" />
-      <End Role="Artist" EntitySet="Artists" />
-    </AssociationSet>
+    <FunctionImport Name="UpdateAlbumRanking">
+      <Parameter Name="StartDate" Mode="In" Type="DateTime" />
+    </FunctionImport>
+    <FunctionImport Name="UpdateSongRanking">
+      <Parameter Name="StartDate" Mode="In" Type="DateTime" />
+    </FunctionImport>
   </EntityContainer>
-  <Association Name="FK_Artist_Genre">
-    <End Type="OnlineMusicModel.Genre" Role="Genre" Multiplicity="1" />
-    <End Type="OnlineMusicModel.Artist" Role="Artist" Multiplicity="*" />
-    <ReferentialConstraint>
-      <Principal Role="Genre">
-        <PropertyRef Name="Id" />
-      </Principal>
-      <Dependent Role="Artist">
-        <PropertyRef Name="GenreId" />
-      </Dependent>
-    </ReferentialConstraint>
-  </Association>
 </Schema>

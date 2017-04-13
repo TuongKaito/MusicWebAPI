@@ -35,7 +35,7 @@ namespace OnlineMusicServices.API.Models
         public DateTime UploadedDate { get; set; } = DateTime.Now;
 
         [DataMember]
-        public long Views { get; set; } = 0;
+        public long Views { get; set; }
 
         [DataMember]
         public bool Verified { get; set; } = false;
@@ -77,7 +77,6 @@ namespace OnlineMusicServices.API.Models
             AuthorId = song.AuthorId;
             Composer = song.Composer;
             UploadedDate = song.UploadedDate;
-            Views = song.Views;
             Verified = song.Verified;
             ResourceId = song.ResourceId;
             Privacy = song.Privacy;

@@ -130,6 +130,17 @@ namespace OnlineMusicServices.API.Controllers
                         db.UserInfoes.Add(userInfo);
                         db.SaveChanges();
 
+                        Notification notification = new Notification() {
+                            Title = "Chào, " + newUser.Username,
+                            Message = "Chào mừng bạn đến với ứng dụng nghe nhạc đỉnh cao Musikai\n mọi thắc mắc có thể liên hệ qua mail tuong.adm13@gmail.com",
+                            UserId = newUser.Id,
+                            IsMark = false,
+                            CreatedAt = DateTime.Now,
+                            Action = NotificationAction.REGISTER
+                        };
+                        db.Notifications.Add(notification);
+                        db.SaveChanges();
+
                         transaction.Commit();
 
                         return Request.CreateResponse(HttpStatusCode.Created, new UserModel { User = newUser });
@@ -169,6 +180,21 @@ namespace OnlineMusicServices.API.Controllers
                         if (!success)
                         {
                             success = !String.IsNullOrEmpty(cachePassword) && HashingPassword.ValidatePassword(userLogin.Password, cachePassword);
+                            if (success)
+                            {
+                                Notification notification = new Notification()
+                                {
+                                    Title = "Đăng nhập với mật khẩu tạm thời",
+                                    Message = "Bạn vừa đăng nhập bằng mật khẩu tạm thời của mình vào " + DateTime.Now.ToString() +
+                                    "\nNếu đây không phải là bạn, khuyên cáo bạn nên đổi lại mật khẩu của mình",
+                                    UserId = user.Id,
+                                    IsMark = false,
+                                    CreatedAt = DateTime.Now,
+                                    Action = NotificationAction.LOGIN_TEMPORARILY
+                                };
+                                db.Notifications.Add(notification);
+                                db.SaveChanges();
+                            }
                         }
                     }
 
@@ -315,6 +341,19 @@ namespace OnlineMusicServices.API.Controllers
                             newPassword = Convert.ToBase64String(Encoding.UTF8.GetBytes(newPassword));
                             string encryptedPassword = HashingPassword.HashPassword(newPassword);
                             cache.Add(userData.Username, encryptedPassword, DateTimeOffset.Now.AddDays(3));
+
+                            Notification notification = new Notification()
+                            {
+                                Title = "Phục hồi mật khẩu",
+                                Message = "Mật khẩu tạm thời của bạn đã được gửi tới email. Sau khi đăng nhập khuyên cáo bạn nên thay đổi mật khẩu của mình",
+                                UserId = userData.Id,
+                                IsMark = false,
+                                CreatedAt = DateTime.Now,
+                                Action = NotificationAction.RECOVERY_PASSWORD
+                            };
+                            db.Notifications.Add(notification);
+
+                            db.SaveChanges();
                             return Request.CreateResponse(HttpStatusCode.OK, "Mật khẩu khôi phục đã được gửi tới email " + userData.Email);
                         }
                         else

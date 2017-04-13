@@ -18,7 +18,9 @@ namespace OnlineMusicServices.Data
         public Song()
         {
             this.Lyrics = new HashSet<Lyric>();
+            this.RankingSongs = new HashSet<RankingSong>();
             this.SongComments = new HashSet<SongComment>();
+            this.SongViews = new HashSet<SongView>();
             this.Albums = new HashSet<Album>();
             this.Playlists = new HashSet<Playlist>();
             this.Artists = new HashSet<Artist>();
@@ -31,17 +33,20 @@ namespace OnlineMusicServices.Data
         public string Composer { get; set; }
         public string ResourceId { get; set; }
         public System.DateTime UploadedDate { get; set; }
-        public long Views { get; set; }
         public bool Verified { get; set; }
         public bool Privacy { get; set; }
     
         public virtual Genre Genre { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Lyric> Lyrics { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<RankingSong> RankingSongs { get; set; }
         public virtual Resource Resource { get; set; }
         public virtual User User { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<SongComment> SongComments { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<SongView> SongViews { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Album> Albums { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

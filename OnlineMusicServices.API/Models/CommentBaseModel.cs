@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Web;
 
 namespace OnlineMusicServices.API.Models
 {
@@ -27,5 +24,10 @@ namespace OnlineMusicServices.API.Models
 
         [DataMember]
         public UserModel User { get; set; }
+
+        [Required]
+        [DataMember]
+        public long DataId { get; set; }
+        
     }
 }

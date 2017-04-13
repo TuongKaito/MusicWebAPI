@@ -18,8 +18,8 @@ namespace OnlineMusicServices.Data
         public Genre()
         {
             this.Albums = new HashSet<Album>();
-            this.Songs = new HashSet<Song>();
             this.Artists = new HashSet<Artist>();
+            this.Songs = new HashSet<Song>();
         }
     
         public int Id { get; set; }
@@ -29,8 +29,8 @@ namespace OnlineMusicServices.Data
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Album> Albums { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Song> Songs { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Artist> Artists { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Song> Songs { get; set; }
     }
 }

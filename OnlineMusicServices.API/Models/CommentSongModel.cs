@@ -8,12 +8,8 @@ using System.Web;
 
 namespace OnlineMusicServices.API.Models
 {
-    [DataContract]
     public class CommentSongModel : CommentBaseModel<SongComment>
     {
-        [Required]
-        [DataMember]
-        public long SongId { get; set; }
 
         public SongComment SongComment
         {
@@ -28,7 +24,7 @@ namespace OnlineMusicServices.API.Models
         {
             songComment.Comment = Comment;
             songComment.UserId = UserId;
-            songComment.SongId = SongId;
+            songComment.SongId = DataId;
         }
 
         public override void CopyEntityData(SongComment songComment)
@@ -36,7 +32,7 @@ namespace OnlineMusicServices.API.Models
             Comment = songComment.Comment;
             Date = songComment.Date;
             UserId = songComment.UserId;
-            SongId = songComment.SongId;
+            DataId = songComment.SongId;
         }
     }
 }

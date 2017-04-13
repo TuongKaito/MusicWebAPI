@@ -19,6 +19,7 @@ namespace OnlineMusicServices.Data
         {
             this.AlbumComments = new HashSet<AlbumComment>();
             this.Lyrics = new HashSet<Lyric>();
+            this.Notifications = new HashSet<Notification>();
             this.Playlists = new HashSet<Playlist>();
             this.PlaylistComments = new HashSet<PlaylistComment>();
             this.Songs = new HashSet<Song>();
@@ -40,6 +41,8 @@ namespace OnlineMusicServices.Data
         public virtual ICollection<AlbumComment> AlbumComments { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Lyric> Lyrics { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Notification> Notifications { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Playlist> Playlists { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

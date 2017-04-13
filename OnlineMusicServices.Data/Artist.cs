@@ -24,21 +24,21 @@ namespace OnlineMusicServices.Data
     
         public int Id { get; set; }
         public string FullName { get; set; }
+        public int GenreId { get; set; }
         public Nullable<int> Gender { get; set; }
         public Nullable<System.DateTime> DateOfBirth { get; set; }
         public string City { get; set; }
         public string Profile { get; set; }
-        public bool Verified { get; set; } = false;
+        public bool Verified { get; set; }
         public string Photo { get; set; }
-        public int GenreId { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Album> Albums { get; set; }
+        public virtual Genre Genre { get; set; }
         public virtual Resource Resource { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<User> Users { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Song> Songs { get; set; }
-        public virtual Genre Genre { get; set; }
     }
 }

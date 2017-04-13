@@ -15,7 +15,7 @@
     </select>
     <br />
     Id: <input type="text" id="idUpload" placeholder="Id upload" /><br />
-    Token: <input type="text" id="token" placeholder="Token" value="EsOB9T6qjCcKsIL0VTUNuiP47hpBMeQYmqYWsnq0s527CPIpO9yZ7iRwbKKEBvyejfm-TMyQsc7dsLB3IUVPQvv6d77e7YUEyu6e1Hm7vrVflKH1i_uX505kt0R0Yy0C5ZT9gaGoWaEuzVKPDgaygPZ-x9EfPkEiTaImiCnUEYh6ONIlbP5MF75BaoR8RKgEzjDjPzGW_vF8a_E_18brwK_ZWE5y8oAwIS8VFW1Xgcn1rW4EUwn88LKSXmIs_hemqNOGvQ_tqDwUKfPmuE3zyy635_fs6nHpwmjmNo9263ZPDqwJtzqmqfD2mG5sJ2Zs" /><br />
+    Token: <input type="text" id="token" placeholder="Token" value="e6rPkHXGdfGSC5rU6nzpGiZDX4jhnvrjdByeJpa4CuidzA6LTvYwsi408WUyHvrKxjSlfxgJe_hCkJ4C6koUB1JuluVv1befFUB55W7gZFFfgW2OculgRGrofvOy25cpshZSWQsPGLZr_tpbCPWYHemNgzpTLvYHyNEGr5pbb81dHE9QeQoiUV0AXYfDVDr02NNJTbDOsCA9l3Lym-Urko9bEoI7fLTEscQgVh9mvfNSUc8Xo4sWGUPZziuhljPW8l27nVdJXh2HECRPcCTruDoNxzcdF02UFTtOj2jBYtLELFgxHgc16eoNRrouwg4h" /><br />
     <form id="data" method="post" action="/api/songs/2/upload" enctype="multipart/form-data">
         File: <input type="file" name="file" /><br />
         <input type="submit" value="Upload" />
@@ -36,7 +36,6 @@
                 return false;
             }
 
-            // Admin token: EsOB9T6qjCcKsIL0VTUNuiP47hpBMeQYmqYWsnq0s527CPIpO9yZ7iRwbKKEBvyejfm-TMyQsc7dsLB3IUVPQvv6d77e7YUEyu6e1Hm7vrVflKH1i_uX505kt0R0Yy0C5ZT9gaGoWaEuzVKPDgaygPZ-x9EfPkEiTaImiCnUEYh6ONIlbP5MF75BaoR8RKgEzjDjPzGW_vF8a_E_18brwK_ZWE5y8oAwIS8VFW1Xgcn1rW4EUwn88LKSXmIs_hemqNOGvQ_tqDwUKfPmuE3zyy635_fs6nHpwmjmNo9263ZPDqwJtzqmqfD2mG5sJ2Zs
             var url = `http://localhost:8080/api/${type}/${id}/upload`;
             // Grab all form data
             var formData = new FormData($(this)[0]);

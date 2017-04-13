@@ -97,3 +97,12 @@ D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.API\bin\EntityFramework
 D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.API\bin\EntityFramework.SqlServer.xml
 D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.API\bin\ImageResizer.dll
 D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.API\bin\ImageResizer.xml
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.API\bin\Common.Logging.Core.dll
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.API\bin\Common.Logging.dll
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.API\bin\Quartz.dll
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.API\bin\Common.Logging.pdb
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.API\bin\Common.Logging.xml
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.API\bin\Common.Logging.Core.pdb
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.API\bin\Common.Logging.Core.xml
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.API\bin\Quartz.pdb
+D:\Kaito\ASP.NET\OnlineMusicServices\OnlineMusicServices.API\bin\Quartz.xml

@@ -18,6 +18,7 @@ namespace OnlineMusicServices.Data
         public Playlist()
         {
             this.PlaylistComments = new HashSet<PlaylistComment>();
+            this.PlaylistViews = new HashSet<PlaylistView>();
             this.Songs = new HashSet<Song>();
         }
     
@@ -26,12 +27,13 @@ namespace OnlineMusicServices.Data
         public string Description { get; set; }
         public System.DateTime CreatedDate { get; set; }
         public int UserId { get; set; }
-        public long Views { get; set; }
         public string Photo { get; set; }
     
         public virtual User User { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<PlaylistComment> PlaylistComments { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<PlaylistView> PlaylistViews { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Song> Songs { get; set; }
     }

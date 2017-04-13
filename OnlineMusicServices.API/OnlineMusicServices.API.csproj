@@ -47,6 +47,14 @@
       <HintPath>..\packages\BCrypt.Net.0.1.0\lib\net35\BCrypt.Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Common.Logging, Version=3.3.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Common.Logging.3.3.1\lib\net40\Common.Logging.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Common.Logging.Core, Version=3.3.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Common.Logging.Core.3.3.1\lib\net40\Common.Logging.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
       <Private>True</Private>
@@ -152,6 +160,10 @@
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Quartz, Version=2.5.0.0, Culture=neutral, PublicKeyToken=f6b8c98a402cc8a4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Quartz.2.5.0\lib\net40\Quartz.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />
@@ -223,6 +235,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Start\JobScheduler.cs" />
     <Compile Include="App_Start\Startup.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AccountController.cs" />
@@ -236,20 +249,27 @@
     <Compile Include="DTO\AlbumDTO.cs" />
     <Compile Include="DTO\ArtistDTO.cs" />
     <Compile Include="DTO\PlaylistDTO.cs" />
+    <Compile Include="DTO\RankingAlbumDTO.cs" />
+    <Compile Include="DTO\RankingSongDTO.cs" />
     <Compile Include="DTO\SongDTO.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AlbumModel.cs" />
+    <Compile Include="Models\RankingAlbumModel.cs" />
     <Compile Include="Models\ArtistModel.cs" />
     <Compile Include="Models\BaseModel.cs" />
+    <Compile Include="Models\BaseRanking.cs" />
     <Compile Include="Models\CommentAlbumModel.cs" />
     <Compile Include="Models\CommentBaseModel.cs" />
     <Compile Include="Models\CommentPlaylistModel.cs" />
     <Compile Include="Models\CommentSongModel.cs" />
     <Compile Include="Models\GenreModel.cs" />
     <Compile Include="Models\LyricModel.cs" />
+    <Compile Include="Models\NotificationAction.cs" />
+    <Compile Include="Models\NotificationModel.cs" />
     <Compile Include="Models\PlaylistModel.cs" />
+    <Compile Include="Models\RankingSongModel.cs" />
     <Compile Include="Models\ResourceModel.cs" />
     <Compile Include="Models\ResourceTypeModel.cs" />
     <Compile Include="Models\RoleModel.cs" />
@@ -257,6 +277,7 @@
     <Compile Include="Models\UserInfoModel.cs" />
     <Compile Include="Models\UserModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scheduler\RankingOfWeek.cs" />
     <Compile Include="Security\AppFlowMetadata.cs" />
     <Compile Include="Security\CheckNullAttribute.cs" />
     <Compile Include="Security\CustomAuthorizationServerProvider.cs" />
@@ -274,6 +295,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Storage\client_secret.json" />
+    <None Include="job_scheduling_data_2_0.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
