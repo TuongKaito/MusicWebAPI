@@ -3,6 +3,7 @@ using OnlineMusicServices.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Web;
 
 namespace OnlineMusicServices.API.DTO
@@ -16,7 +17,7 @@ namespace OnlineMusicServices.API.DTO
             DomainHosting = $"{uri.Scheme}://{uri.Authority}/api/resources/streaming/";
         }
 
-        public IQueryable<ArtistModel> GetArtistQuery(OnlineMusicEntities db, System.Linq.Expressions.Expression<Func<Artist, bool>> whereClause = null)
+        public IQueryable<ArtistModel> GetArtistQuery(OnlineMusicEntities db, Expression<Func<Artist, bool>> whereClause = null)
         {
             IQueryable<Artist> query = db.Artists;
             if (whereClause != null)
@@ -41,7 +42,7 @@ namespace OnlineMusicServices.API.DTO
                 FullName = a.FullName,
                 GenreId = a.GenreId,
                 Genre = new GenreModel() { Genre = a.Genre },
-                Gender = a.Gender.Value,
+                Gender = a.Gender.GetValueOrDefault(),
                 DateOfBirth = a.DateOfBirth,
                 City = a.City,
                 Profile = a.Profile,

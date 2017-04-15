@@ -112,6 +112,9 @@
     <Compile Include="Role.cs">
       <DependentUpon>OnlineMusicDataModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Score.cs">
+      <DependentUpon>OnlineMusicDataModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Song.cs">
       <DependentUpon>OnlineMusicDataModel.tt</DependentUpon>
     </Compile>

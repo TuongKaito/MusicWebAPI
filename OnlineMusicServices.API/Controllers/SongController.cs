@@ -20,6 +20,7 @@ namespace OnlineMusicServices.API.Controllers
     {
         GoogleDriveServices services;
         SongDTO dto;
+        CommentDTO commentDto;
         RankingSongDTO rankingSongDto;
 
         public SongController()
@@ -27,6 +28,7 @@ namespace OnlineMusicServices.API.Controllers
             services = new GoogleDriveServices(HttpContext.Current.Server.MapPath("~/"));
             Uri uri = HttpContext.Current.Request.Url;
             dto = new SongDTO(uri);
+            commentDto = new CommentDTO(uri);
             rankingSongDto = new RankingSongDTO(uri);
         }
 
@@ -339,6 +341,11 @@ namespace OnlineMusicServices.API.Controllers
             }
             using (var db = new OnlineMusicEntities())
             {
+                var user = (from u in db.Users where u.Id == songModel.AuthorId select u).FirstOrDefault();
+                if (user == null)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Không tìm thấy user id=" + songModel.AuthorId);
+                }
                 using (var transaction = db.Database.BeginTransaction())
                 {
                     try
@@ -364,12 +371,15 @@ namespace OnlineMusicServices.API.Controllers
                         
                         songModel.UpdateEntity(song);
                         song.UploadedDate = DateTime.Now;
-                        song.Verified = false;
-                        song.Privacy = false;
+                        song.Privacy = song.Verified = song.Official = false;
                         db.Songs.Add(song);
                         db.SaveChanges();
                         transaction.Commit();
-                        songModel = query.Where(s => s.Id == song.Id).FirstOrDefault();
+                        db.Entry(song).Reference(s => s.Genre).Load();
+                        db.Entry(song).Reference(s => s.User).Load();
+                        db.Entry(song).Collection(s => s.Artists).Load();
+
+                        songModel = dto.GetSongQuery(db, s => s.Id == song.Id).FirstOrDefault();
                         return Request.CreateResponse(HttpStatusCode.Created, songModel);
                     }
                     catch (Exception ex)
@@ -393,7 +403,6 @@ namespace OnlineMusicServices.API.Controllers
         {
             using (var db = new OnlineMusicEntities())
             {
-                var query = dto.GetSongQuery(db);
                 var song = (from a in db.Songs
                               where a.Id == songModel.Id
                               select a).FirstOrDefault();
@@ -413,14 +422,15 @@ namespace OnlineMusicServices.API.Controllers
                                    select a).FirstOrDefault();
                         if (art == null)
                         {
-                            art = new Artist() { FullName = artist.FullName };
+                            art = new Artist() { FullName = artist.FullName, GenreId = artist.GenreId > 0 ? artist.GenreId : 1, Gender = 0,
+                                DateOfBirth = null, Photo = GoogleDriveServices.DEFAULT_ARTIST, Verified = false };
                         }
                         song.Artists.Add(art);
                     }
                 }
                 songModel.UpdateEntity(song);
                 db.SaveChanges();
-                songModel = query.FirstOrDefault();
+                songModel = dto.GetSongQuery(db, s => s.Id == song.Id).FirstOrDefault();
                 return Request.CreateResponse(HttpStatusCode.OK, songModel);
             }
         }
@@ -701,10 +711,8 @@ namespace OnlineMusicServices.API.Controllers
         {
             using (var db = new OnlineMusicEntities())
             {
-                var listComments = (from c in db.SongComments
-                                    where c.SongId == id
-                                    orderby c.Date descending
-                                    select new CommentSongModel() { SongComment = c, User = new UserModel { User = c.User } }).ToList();
+                var listComments = commentDto.GetCommentQuery(db, (SongComment c) => c.SongId == id)
+                    .OrderByDescending(c => c.Date).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, listComments);
             }
         }
@@ -726,9 +734,8 @@ namespace OnlineMusicServices.API.Controllers
                 db.SongComments.Add(comment);
                 db.SaveChanges();
 
-                commentModel = (from c in db.SongComments
-                                where c.Id == comment.Id
-                                select new CommentSongModel() { SongComment = c, User = new UserModel { User = c.User } }).SingleOrDefault();
+                comment.User = (from u in db.Users where u.Id == comment.UserId select u).FirstOrDefault();
+                commentModel = commentDto.GetCommentQuery(db, swhereClause: null).Where(c => c.Id == comment.Id).FirstOrDefault();
                 try
                 {
                     Song song = (from s in db.Songs where s.Id == id select s).FirstOrDefault();
@@ -747,8 +754,8 @@ namespace OnlineMusicServices.API.Controllers
                             };
                             db.Notifications.Add(notification);
                         }
-                        UserInfo info = (from i in db.UserInfoes where i.UserId == commentModel.UserId select i).FirstOrDefault();
-                        string actor = info != null && !String.IsNullOrEmpty(info.FullName) ? info.FullName : commentModel.User?.Username;
+                        UserInfoModel info = commentModel.UserInfo;
+                        string actor = info != null && !String.IsNullOrEmpty(info.FullName) ? info.FullName : comment.User?.Username;
                         long commentCount = song.SongComments.Select(c => c.UserId).Distinct().Count();
                         if (commentCount > 1)
                             actor += " và " + (commentCount - 1) + " người khác";
@@ -786,9 +793,7 @@ namespace OnlineMusicServices.API.Controllers
                 }
                 commentModel.UpdateEntity(comment);
                 db.SaveChanges();
-                commentModel = (from c in db.SongComments
-                                where c.Id == comment.Id
-                                select new CommentSongModel() { SongComment = c, User = new UserModel { User = c.User } }).SingleOrDefault();
+                commentModel = commentDto.GetCommentQuery(db, (SongComment c) => c.Id == comment.Id).FirstOrDefault();
                 return Request.CreateResponse(HttpStatusCode.OK, commentModel);
             }
         }

@@ -20,6 +20,7 @@ namespace OnlineMusicServices.API.Controllers
         GoogleDriveServices services;
         AlbumDTO dto;
         SongDTO songDto;
+        CommentDTO commentDto;
         RankingAlbumDTO rankingAlbumDto;
 
         public AlbumController()
@@ -28,6 +29,7 @@ namespace OnlineMusicServices.API.Controllers
             Uri uri = HttpContext.Current.Request.Url;
             dto = new AlbumDTO(uri);
             songDto = new SongDTO(uri);
+            commentDto = new CommentDTO(uri);
             rankingAlbumDto = new RankingAlbumDTO(uri);
         }
 
@@ -127,7 +129,7 @@ namespace OnlineMusicServices.API.Controllers
             using (var db = new OnlineMusicEntities())
             {
                 DateTime rankingDate = new DateTime(year, month, day);
-                var rankingList = rankingAlbumDto.GetQueryRanking(db , r => r.StartDate.Date.Equals(rankingDate.Date)).ToList();
+                var rankingList = rankingAlbumDto.GetQueryRanking(db , r => r.StartDate.Equals(rankingDate)).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, rankingList);
             }
         }
@@ -161,13 +163,15 @@ namespace OnlineMusicServices.API.Controllers
         {
             using (var db = new OnlineMusicEntities())
             {
-                var query = dto.GetAlbumQuery(db);
                 var album = new Album();
                 albumModel.UpdateEntity(album);
                 album.Photo = GoogleDriveServices.DEFAULT_ALBUM;
                 db.Albums.Add(album);
                 db.SaveChanges();
-                albumModel = query.Where(a => a.Id == album.Id).FirstOrDefault();
+                db.Entry(album).Reference(a => a.Genre).Load();
+                db.Entry(album).Reference(a => a.Artist).Load();
+
+                albumModel = dto.Converter(db.Albums.Where(a => a.Id == album.Id).FirstOrDefault());
                 return Request.CreateResponse(HttpStatusCode.Created, albumModel);
             }
         }
@@ -259,7 +263,6 @@ namespace OnlineMusicServices.API.Controllers
         {
             using (var db = new OnlineMusicEntities())
             {
-                var query = dto.GetAlbumQuery(db);
                 var album = (from a in db.Albums
                              where a.Id == albumModel.Id
                              select a).FirstOrDefault();
@@ -270,7 +273,7 @@ namespace OnlineMusicServices.API.Controllers
 
                 albumModel.UpdateEntity(album);
                 db.SaveChanges();
-                albumModel = query.Where(a => a.Id == album.Id).FirstOrDefault();
+                albumModel = dto.Converter(album);
                 return Request.CreateResponse(HttpStatusCode.OK, albumModel);
             }
         }
@@ -464,10 +467,8 @@ namespace OnlineMusicServices.API.Controllers
         {
             using (var db = new OnlineMusicEntities())
             {
-                var listComments = (from c in db.AlbumComments
-                                    where c.AlbumId == id
-                                    orderby c.Date descending
-                                    select new CommentAlbumModel() { AlbumComment = c, User = new UserModel { User = c.User } }).ToList();
+                var listComments = commentDto.GetCommentQuery(db, (AlbumComment c) => c.AlbumId == id)
+                    .OrderByDescending(c => c.Date).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, listComments);
             }
         }
@@ -488,9 +489,9 @@ namespace OnlineMusicServices.API.Controllers
                 comment.Date = DateTime.Now;
                 db.AlbumComments.Add(comment);
                 db.SaveChanges();
-                commentModel = (from c in db.AlbumComments
-                                where c.Id == comment.Id
-                                select new CommentAlbumModel() { AlbumComment = c, User = new UserModel { User = c.User } }).SingleOrDefault();
+
+                comment.User = (from u in db.Users where u.Id == comment.UserId select u).FirstOrDefault();
+                commentModel = commentDto.GetCommentQuery(db, awhereClause: null).Where(c => c.Id == comment.Id).FirstOrDefault();
                 
                 return Request.CreateResponse(HttpStatusCode.Created, commentModel);
             }
@@ -516,9 +517,7 @@ namespace OnlineMusicServices.API.Controllers
                 }
                 commentModel.UpdateEntity(comment);
                 db.SaveChanges();
-                commentModel = (from c in db.AlbumComments
-                                where c.Id == comment.Id
-                                select new CommentAlbumModel() { AlbumComment = c, User = new UserModel { User = c.User } }).SingleOrDefault();
+                commentModel = commentDto.GetCommentQuery(db, awhereClause: null).Where(c => c.Id == comment.Id).FirstOrDefault();
                 return Request.CreateResponse(HttpStatusCode.OK, commentModel);
             }
         }

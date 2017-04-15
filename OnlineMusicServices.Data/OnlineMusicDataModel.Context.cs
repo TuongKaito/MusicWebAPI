@@ -48,6 +48,7 @@ namespace OnlineMusicServices.Data
         public virtual DbSet<sysdiagram> sysdiagrams { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<UserInfo> UserInfoes { get; set; }
+        public virtual DbSet<Score> Scores { get; set; }
     
         public virtual int UpdateAlbumRanking(Nullable<System.DateTime> startDate)
         {

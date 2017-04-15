@@ -21,12 +21,15 @@ namespace OnlineMusicServices.API.Controllers
         GoogleDriveServices services;
         PlaylistDTO dto;
         SongDTO songDto;
+        CommentDTO commentDto;
 
         public PlaylistController()
         {
             services = new GoogleDriveServices(HttpContext.Current.Server.MapPath("~/"));
-            dto = new PlaylistDTO(HttpContext.Current.Request.Url);
-            songDto = new SongDTO(HttpContext.Current.Request.Url);
+            Uri uri = HttpContext.Current.Request.Url;
+            dto = new PlaylistDTO(uri);
+            songDto = new SongDTO(uri);
+            commentDto = new CommentDTO(uri);
         }
 
         #region Playlist Services
@@ -103,14 +106,14 @@ namespace OnlineMusicServices.API.Controllers
         {
             using (var db = new OnlineMusicEntities())
             {
-                var query = dto.GetPlaylistQuery(db);
                 var playlist = new Playlist();
                 playlistModel.UpdateEntity(playlist);
                 playlist.CreatedDate = DateTime.Now;
                 playlist.Photo = GoogleDriveServices.DEFAULT_PLAYLIST;
                 db.Playlists.Add(playlist);
                 db.SaveChanges();
-                playlistModel = query.Where(a => a.Id == playlist.Id).FirstOrDefault();
+                db.Entry(playlist).Reference(pl => pl.User).Load();
+                playlistModel = dto.GetPlaylistQuery(db, a => a.Id == playlist.Id).FirstOrDefault();
                 return Request.CreateResponse(HttpStatusCode.Created, playlistModel);
             }
         }
@@ -202,7 +205,6 @@ namespace OnlineMusicServices.API.Controllers
         {
             using (var db = new OnlineMusicEntities())
             {
-                var query = dto.GetPlaylistQuery(db);
                 var playlist = (from a in db.Playlists
                              where a.Id == playlistModel.Id
                              select a).FirstOrDefault();
@@ -213,7 +215,7 @@ namespace OnlineMusicServices.API.Controllers
 
                 playlistModel.UpdateEntity(playlist);
                 db.SaveChanges();
-                playlistModel = query.Where(pl => pl.Id == playlist.Id).FirstOrDefault();
+                playlistModel = dto.GetPlaylistQuery(db, pl => pl.Id == playlist.Id).FirstOrDefault();
                 return Request.CreateResponse(HttpStatusCode.OK, playlistModel);
             }
         }
@@ -388,10 +390,7 @@ namespace OnlineMusicServices.API.Controllers
         {
             using (var db = new OnlineMusicEntities())
             {
-                var listComments = (from c in db.PlaylistComments
-                                    where c.PlaylistId == id
-                                    orderby c.Date descending
-                                    select new CommentPlaylistModel() { PlaylistComment = c, User = new UserModel { User = c.User } }).ToList();
+                var listComments = commentDto.GetCommentQuery(db, (PlaylistComment c) => c.PlaylistId == id).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, listComments);
             }
         }
@@ -412,9 +411,9 @@ namespace OnlineMusicServices.API.Controllers
                 comment.Date = DateTime.Now;
                 db.PlaylistComments.Add(comment);
                 db.SaveChanges();
-                commentModel = (from c in db.PlaylistComments
-                                where c.Id == comment.Id
-                                select new CommentPlaylistModel() { PlaylistComment = c, User = new UserModel { User = c.User } }).SingleOrDefault();
+
+                comment.User = (from u in db.Users where u.Id == comment.UserId select u).FirstOrDefault();
+                commentModel = commentDto.GetCommentQuery(db, pwhereClause: null).Where(c => c.Id == comment.Id).FirstOrDefault();
 
                 // Push notification
                 try
@@ -435,8 +434,8 @@ namespace OnlineMusicServices.API.Controllers
                             };
                             db.Notifications.Add(notification);
                         }
-                        UserInfo info = (from i in db.UserInfoes where i.UserId == commentModel.UserId select i).FirstOrDefault();
-                        string actor = info != null && !String.IsNullOrEmpty(info.FullName) ? info.FullName : commentModel.User?.Username;
+                        UserInfoModel info = commentModel.UserInfo;
+                        string actor = info != null && !String.IsNullOrEmpty(info.FullName) ? info.FullName : comment.User?.Username;
                         long commentCount = playlist.PlaylistComments.Select(c => c.UserId).Distinct().Count();
                         if (commentCount > 1)
                             actor += " và " + (commentCount - 1) + " người khác";
@@ -473,9 +472,7 @@ namespace OnlineMusicServices.API.Controllers
                 }
                 commentModel.UpdateEntity(comment);
                 db.SaveChanges();
-                commentModel = (from c in db.PlaylistComments
-                                where c.Id == comment.Id
-                                select new CommentPlaylistModel() { PlaylistComment = c, User = new UserModel { User = c.User } }).SingleOrDefault();
+                commentModel = commentDto.GetCommentQuery(db, pwhereClause: null).Where(c => c.Id == comment.Id).FirstOrDefault();
                 return Request.CreateResponse(HttpStatusCode.OK, commentModel);
             }
         }

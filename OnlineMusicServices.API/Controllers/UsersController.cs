@@ -19,6 +19,7 @@ namespace OnlineMusicServices.API.Controllers
     public class UsersController : ApiController
     {
         GoogleDriveServices services;
+        UserInfoDTO dto;
         PlaylistDTO playlistDto;
         SongDTO songDto;
         string domainHosting;
@@ -27,9 +28,9 @@ namespace OnlineMusicServices.API.Controllers
         {
             services = new GoogleDriveServices(HttpContext.Current.Server.MapPath("~/"));
             Uri uri = HttpContext.Current.Request.Url;
+            dto = new UserInfoDTO(uri);
             playlistDto = new PlaylistDTO(uri);
             songDto = new SongDTO(uri);
-            domainHosting = $"{uri.Scheme}://{uri.Authority}/api/resources/streaming/";
         }
 
         [Route("famous")]
@@ -38,11 +39,7 @@ namespace OnlineMusicServices.API.Controllers
         {
             using (OnlineMusicEntities db = new OnlineMusicEntities())
             {
-                return Request.CreateResponse(HttpStatusCode.OK, (from info in db.UserInfoes
-                                                                  join user in db.Users on info.UserId equals user.Id
-                                                                  orderby user.User1.Count descending, user.Users.Count descending
-                                                                  where user.RoleId != (int)RoleManager.Admin
-                                                                  select new UserInfoModel { UserInfo = info, Followers = user.User1.Count, Avatar = domainHosting + info.Avatar })
+                return Request.CreateResponse(HttpStatusCode.OK, dto.GetUserInfoQuery(db)
                                                                   .OrderByDescending(info => info.Followers)
                                                                   .Skip((page - 1) * size)
                                                                   .Take(size)
@@ -61,10 +58,7 @@ namespace OnlineMusicServices.API.Controllers
         {
             using (OnlineMusicEntities db = new OnlineMusicEntities())
             {
-                return Request.CreateResponse(HttpStatusCode.OK, (from info in db.UserInfoes
-                                                                  join user in db.Users on info.UserId equals user.Id
-                                                                  where info.UserId == id
-                                                                  select new UserInfoModel { UserInfo = info, Followers = user.User1.Count, Avatar = domainHosting + info.Avatar }).FirstOrDefault());
+                return Request.CreateResponse(HttpStatusCode.OK, dto.GetUserInfoQuery(db, info => info.UserId == id).FirstOrDefault());
             }
         }
 
@@ -369,8 +363,8 @@ namespace OnlineMusicServices.API.Controllers
                 }
                 var listUsers = (from l in list
                                  join info in db.UserInfoes on l.Id equals info.UserId
-                                 select new UserInfoModel() { UserInfo = info, Followers = l.User1.Count, Avatar = domainHosting + info.Avatar }).ToList();
-                return Request.CreateResponse(HttpStatusCode.OK, listUsers);
+                                 select info).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, dto.ConvertToUserInfoModel(listUsers));
             }
         }
 

@@ -35,6 +35,7 @@ namespace OnlineMusicServices.Data
         public System.DateTime UploadedDate { get; set; }
         public bool Verified { get; set; }
         public bool Privacy { get; set; }
+        public bool Official { get; set; }
     
         public virtual Genre Genre { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

@@ -242,16 +242,20 @@
     <Compile Include="Controllers\AlbumController.cs" />
     <Compile Include="Controllers\ArtistController.cs" />
     <Compile Include="Controllers\GenreController.cs" />
+    <Compile Include="Controllers\MusicGameController.cs" />
     <Compile Include="Controllers\PlaylistController.cs" />
     <Compile Include="Controllers\ResourceController.cs" />
     <Compile Include="Controllers\SongController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="DTO\AlbumDTO.cs" />
     <Compile Include="DTO\ArtistDTO.cs" />
+    <Compile Include="DTO\CommentDTO.cs" />
     <Compile Include="DTO\PlaylistDTO.cs" />
     <Compile Include="DTO\RankingAlbumDTO.cs" />
     <Compile Include="DTO\RankingSongDTO.cs" />
+    <Compile Include="DTO\ScoreDTO.cs" />
     <Compile Include="DTO\SongDTO.cs" />
+    <Compile Include="DTO\UserInfoDTO.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -273,6 +277,7 @@
     <Compile Include="Models\ResourceModel.cs" />
     <Compile Include="Models\ResourceTypeModel.cs" />
     <Compile Include="Models\RoleModel.cs" />
+    <Compile Include="Models\ScoreModel.cs" />
     <Compile Include="Models\SongModel.cs" />
     <Compile Include="Models\UserInfoModel.cs" />
     <Compile Include="Models\UserModel.cs" />

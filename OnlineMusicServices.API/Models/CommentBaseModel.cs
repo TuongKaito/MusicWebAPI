@@ -23,7 +23,7 @@ namespace OnlineMusicServices.API.Models
         public int UserId { get; set; }
 
         [DataMember]
-        public UserModel User { get; set; }
+        public UserInfoModel UserInfo { get; set; }
 
         [Required]
         [DataMember]

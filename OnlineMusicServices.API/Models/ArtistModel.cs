@@ -63,7 +63,8 @@ namespace OnlineMusicServices.API.Models
         {
             artist.FullName = FullName;
             artist.GenreId = GenreId > 0 ? GenreId : 1;
-            artist.DateOfBirth = DateOfBirth.GetValueOrDefault();
+            artist.Gender = Gender;
+            artist.DateOfBirth = DateOfBirth;
             artist.City = City;
             artist.Profile = Profile;
             artist.Verified = Verified;

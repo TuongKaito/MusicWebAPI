@@ -172,6 +172,7 @@
     <EntitySetMapping Name="Songs">
       <EntityTypeMapping TypeName="OnlineMusicModel.Song">
         <MappingFragment StoreEntitySet="Song">
+          <ScalarProperty Name="Official" ColumnName="Official" />
           <ScalarProperty Name="Id" ColumnName="Id" />
           <ScalarProperty Name="Title" ColumnName="Title" />
           <ScalarProperty Name="GenreId" ColumnName="GenreId" />
@@ -284,5 +285,14 @@
     </AssociationSetMapping>
     <FunctionImportMapping FunctionImportName="UpdateAlbumRanking" FunctionName="OnlineMusicModel.Store.UpdateAlbumRanking" />
     <FunctionImportMapping FunctionImportName="UpdateSongRanking" FunctionName="OnlineMusicModel.Store.UpdateSongRanking" />
+    <EntitySetMapping Name="Scores">
+      <EntityTypeMapping TypeName="OnlineMusicModel.Score">
+        <MappingFragment StoreEntitySet="Score">
+          <ScalarProperty Name="Score1" ColumnName="Score" />
+          <ScalarProperty Name="UserId" ColumnName="UserId" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
   </EntityContainerMapping>
 </Mapping>

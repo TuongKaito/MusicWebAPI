@@ -213,6 +213,7 @@
     <NavigationProperty Name="Albums" Relationship="Self.AlbumSongs" FromRole="Song" ToRole="Album" />
     <NavigationProperty Name="Playlists" Relationship="Self.PlaylistSongs" FromRole="Song" ToRole="Playlist" />
     <NavigationProperty Name="Artists" Relationship="Self.SongArtists" FromRole="Song" ToRole="Artist" />
+    <Property Name="Official" Type="Boolean" Nullable="false" />
   </EntityType>
   <EntityType Name="SongComment">
     <Key>
@@ -269,6 +270,7 @@
     <NavigationProperty Name="Artists" Relationship="Self.FollowerArtist" FromRole="User" ToRole="Artist" />
     <NavigationProperty Name="User1" Relationship="Self.FollowerUser" FromRole="User" ToRole="User1" />
     <NavigationProperty Name="Users" Relationship="Self.FollowerUser" FromRole="User1" ToRole="User" />
+    <NavigationProperty Name="Scores" Relationship="OnlineMusicModel.FK_Score_User" FromRole="User" ToRole="Score" />
   </EntityType>
   <EntityType Name="UserInfo">
     <Key>
@@ -800,5 +802,31 @@
     <FunctionImport Name="UpdateSongRanking">
       <Parameter Name="StartDate" Mode="In" Type="DateTime" />
     </FunctionImport>
+    <EntitySet Name="Scores" EntityType="OnlineMusicModel.Score" />
+    <AssociationSet Name="FK_Score_User" Association="OnlineMusicModel.FK_Score_User">
+      <End Role="User" EntitySet="Users" />
+      <End Role="Score" EntitySet="Scores" />
+    </AssociationSet>
   </EntityContainer>
+  <EntityType Name="Score">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="UserId" Type="Int32" Nullable="false" />
+    <Property Name="Score1" Type="Int64" Nullable="false" />
+    <NavigationProperty Name="User" Relationship="OnlineMusicModel.FK_Score_User" FromRole="Score" ToRole="User" />
+  </EntityType>
+  <Association Name="FK_Score_User">
+    <End Type="OnlineMusicModel.User" Role="User" Multiplicity="1" />
+    <End Type="OnlineMusicModel.Score" Role="Score" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="User">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Score">
+        <PropertyRef Name="UserId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
 </Schema>

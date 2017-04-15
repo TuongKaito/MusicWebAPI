@@ -242,13 +242,15 @@ namespace OnlineMusicServices.API.Controllers
             {
                 using (var db = new OnlineMusicEntities())
                 {
-                    var query = dto.GetArtistQuery(db);
                     Artist artist = new Artist();
                     artistModel.UpdateEntity(artist);
                     artist.Photo = GoogleDriveServices.DEFAULT_ARTIST;
                     db.Artists.Add(artist);
                     db.SaveChanges();
-                    artistModel = query.Where(a => a.Id == artist.Id).FirstOrDefault();
+                    db.Entry(artist).Reference(a => a.Genre).Load();
+                    db.Entry(artist).Collection(a => a.Users).Load();
+
+                    artistModel = dto.GetArtistQuery(db, a => a.Id == artist.Id).FirstOrDefault();
                     return Request.CreateResponse(HttpStatusCode.Created, artistModel);
                 }
             }

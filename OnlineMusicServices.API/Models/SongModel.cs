@@ -47,6 +47,9 @@ namespace OnlineMusicServices.API.Models
         public bool Privacy { get; set; } = true;
 
         [DataMember]
+        public bool Official { get; set; }
+
+        [DataMember]
         public GenreModel Genre { get; set; }
 
         [DataMember]
@@ -68,6 +71,7 @@ namespace OnlineMusicServices.API.Models
             song.Composer = Composer;
             song.Verified = Verified;
             song.Privacy = Privacy;
+            song.Official = Official;
         }
 
         public override void CopyEntityData(Song song)
@@ -80,6 +84,7 @@ namespace OnlineMusicServices.API.Models
             Verified = song.Verified;
             ResourceId = song.ResourceId;
             Privacy = song.Privacy;
+            Official = song.Official;
         }
     }
 }

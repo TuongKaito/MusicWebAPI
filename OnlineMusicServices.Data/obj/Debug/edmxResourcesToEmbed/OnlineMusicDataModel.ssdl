@@ -185,6 +185,14 @@
     <Property Name="RoleId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="RoleName" Type="nvarchar" MaxLength="50" Nullable="false" />
   </EntityType>
+  <EntityType Name="Score">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="UserId" Type="int" Nullable="false" />
+    <Property Name="Score" Type="bigint" Nullable="false" />
+  </EntityType>
   <EntityType Name="Song">
     <Key>
       <PropertyRef Name="Id" />
@@ -198,6 +206,7 @@
     <Property Name="UploadedDate" Type="datetime" Nullable="false" />
     <Property Name="Verified" Type="bit" Nullable="false" />
     <Property Name="Privacy" Type="bit" Nullable="false" />
+    <Property Name="Official" Type="bit" Nullable="false" />
   </EntityType>
   <EntityType Name="SongArtists">
     <Key>
@@ -586,6 +595,18 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Association Name="FK_Score_User">
+    <End Role="User" Type="Self.User" Multiplicity="1" />
+    <End Role="Score" Type="Self.Score" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="User">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Score">
+        <PropertyRef Name="UserId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
   <Association Name="FK_Song_Genre">
     <End Role="Genre" Type="Self.Genre" Multiplicity="1" />
     <End Role="Song" Type="Self.Song" Multiplicity="*" />
@@ -752,6 +773,7 @@
     <EntitySet Name="Resource" EntityType="Self.Resource" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="ResourceType" EntityType="Self.ResourceType" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="Role" EntityType="Self.Role" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="Score" EntityType="Self.Score" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="Song" EntityType="Self.Song" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="SongArtists" EntityType="Self.SongArtists" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="SongComments" EntityType="Self.SongComments" Schema="dbo" store:Type="Tables" />
@@ -862,6 +884,10 @@
     <AssociationSet Name="FK_Resource_ResourceType" Association="Self.FK_Resource_ResourceType">
       <End Role="ResourceType" EntitySet="ResourceType" />
       <End Role="Resource" EntitySet="Resource" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Score_User" Association="Self.FK_Score_User">
+      <End Role="User" EntitySet="User" />
+      <End Role="Score" EntitySet="Score" />
     </AssociationSet>
     <AssociationSet Name="FK_Song_Genre" Association="Self.FK_Song_Genre">
       <End Role="Genre" EntitySet="Genre" />

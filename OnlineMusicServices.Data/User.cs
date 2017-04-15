@@ -28,6 +28,7 @@ namespace OnlineMusicServices.Data
             this.Artists = new HashSet<Artist>();
             this.User1 = new HashSet<User>();
             this.Users = new HashSet<User>();
+            this.Scores = new HashSet<Score>();
         }
     
         public int Id { get; set; }
@@ -60,5 +61,7 @@ namespace OnlineMusicServices.Data
         public virtual ICollection<User> User1 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<User> Users { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Score> Scores { get; set; }
     }
 }

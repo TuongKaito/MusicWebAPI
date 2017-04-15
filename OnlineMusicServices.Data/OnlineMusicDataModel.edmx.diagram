@@ -58,6 +58,8 @@
         <AssociationConnector Association="OnlineMusicModel.FollowerUser" ManuallyRouted="false" />
         <AssociationConnector Association="OnlineMusicModel.PlaylistSongs" ManuallyRouted="false" />
         <AssociationConnector Association="OnlineMusicModel.SongArtists" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="OnlineMusicModel.Score" Width="1.5" PointX="10.5" PointY="4.75" />
+        <AssociationConnector Association="OnlineMusicModel.FK_Score_User" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

@@ -3,6 +3,7 @@ using OnlineMusicServices.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Web;
 
 namespace OnlineMusicServices.API.DTO
@@ -18,23 +19,24 @@ namespace OnlineMusicServices.API.DTO
             artistDto = new ArtistDTO(uri);
         }
 
-        public IQueryable<SongModel> GetSongQuery(OnlineMusicEntities db, System.Linq.Expressions.Expression<Func<Song, bool>> whereClause = null)
+        public IQueryable<SongModel> GetSongQuery(OnlineMusicEntities db, Expression<Func<Song, bool>> whereClause = null)
         {
             IQueryable<Song> query = db.Songs;
             if (whereClause != null)
             {
                 query = query.Where(whereClause);
             }
+            
             var songQuery = query.Select(Converter).AsQueryable();
             return songQuery;
         }
-
+        
         public ICollection<SongModel> ConvertToSongModel(ICollection<Song> songs)
         {
             var listSongs = songs.Select(Converter).ToList();
             return listSongs;
         }
-
+        
         public SongModel Converter(Song s)
         {
             return new SongModel
@@ -48,6 +50,7 @@ namespace OnlineMusicServices.API.DTO
                 Privacy = s.Privacy,
                 UploadedDate = s.UploadedDate,
                 Verified = s.Verified,
+                Official = s.Official,
                 Views = (from v in s.SongViews select v.Views).FirstOrDefault(),
                 Id = s.Id,
                 ResourceId = s.ResourceId,
