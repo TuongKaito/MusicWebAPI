@@ -483,6 +483,18 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Association Name="FK_Playlist_Resource">
+    <End Role="Resource" Type="Self.Resource" Multiplicity="0..1" />
+    <End Role="Playlist" Type="Self.Playlist" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Resource">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Playlist">
+        <PropertyRef Name="Photo" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
   <Association Name="FK_Playlist_User">
     <End Role="User" Type="Self.User" Multiplicity="1" />
     <End Role="Playlist" Type="Self.Playlist" Multiplicity="*" />
@@ -848,6 +860,10 @@
     <AssociationSet Name="FK_Notification_User" Association="Self.FK_Notification_User">
       <End Role="User" EntitySet="User" />
       <End Role="Notification" EntitySet="Notification" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Playlist_Resource" Association="Self.FK_Playlist_Resource">
+      <End Role="Resource" EntitySet="Resource" />
+      <End Role="Playlist" EntitySet="Playlist" />
     </AssociationSet>
     <AssociationSet Name="FK_Playlist_User" Association="Self.FK_Playlist_User">
       <End Role="User" EntitySet="User" />

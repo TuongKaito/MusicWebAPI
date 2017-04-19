@@ -36,5 +36,6 @@ namespace OnlineMusicServices.Data
         public virtual ICollection<PlaylistView> PlaylistViews { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Song> Songs { get; set; }
+        public virtual Resource Resource { get; set; }
     }
 }

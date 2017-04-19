@@ -316,7 +316,7 @@ namespace OnlineMusicServices.API.Controllers
         [Authorize(Roles = "User")]
         [Route("{id}/songs")]
         [HttpPut]
-        public HttpResponseMessage AddSongToPlaylist([FromUri] int id, [FromBody] ICollection<SongModel> listSongs)
+        public HttpResponseMessage AddSongsToPlaylist([FromUri] int id, [FromBody] ICollection<SongModel> listSongs)
         {
             using (var db = new OnlineMusicEntities())
             {
@@ -343,10 +343,38 @@ namespace OnlineMusicServices.API.Controllers
                     if (sg != null)
                         playlist.Songs.Add(sg);
                 }
-                // List songs add to playlist invalid
-                if (playlist.Songs.Count == 0)
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK);
+            }
+        }
+
+        [Authorize(Roles = "User")]
+        [Route("{playlistId}/songs/{songId}")]
+        [HttpPut]
+        public HttpResponseMessage AddSongToPlaylist([FromUri] int playlistId, [FromUri] int songId)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                var playlist = (from a in db.Playlists
+                                where a.Id == playlistId
+                                select a).FirstOrDefault();
+                if (playlist == null)
                 {
-                    return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Danh sách bài hát không hợp lệ");
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Không tìm thấy playlist id=" + playlistId);
+                }
+                // Identity user upload song to playlist
+                var identity = (ClaimsIdentity)User.Identity;
+                if (identity.Name != playlist.UserId.ToString())
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Invalid Token");
+                }
+                
+                var sg = (from s in db.Songs
+                            where s.Id == songId
+                            select s).FirstOrDefault();
+                if (sg != null)
+                {
+                    playlist.Songs.Add(sg);
                 }
                 db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK);

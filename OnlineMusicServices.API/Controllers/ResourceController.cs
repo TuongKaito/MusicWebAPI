@@ -10,6 +10,7 @@ using System.Net.Http.Headers;
 using System.Web;
 using System.Web.Http;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace OnlineMusicServices.API.Controllers
 {
@@ -110,6 +111,50 @@ namespace OnlineMusicServices.API.Controllers
                 response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
                 response.Content.Headers.ContentLength = stream.Length;
                 return response;
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [Route("unused")]
+        [HttpGet]
+        public HttpResponseMessage GetUnusedResources()
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                var resources = db.Resources.Except(db.Songs.Select(s => s.Resource).AsEnumerable())
+                    .Except(db.Artists.Select(a => a.Resource).AsEnumerable())
+                    .Except(db.Albums.Select(a => a.Resource).AsEnumerable())
+                    .Except(db.Playlists.Select(p => p.Resource).AsEnumerable())
+                    .Except(db.UserInfoes.Select(u => u.Resource).AsEnumerable());
+                var unusedList = resources.Select(r => new ResourceModel() { Id = r.Id, Name = r.Name, TypeId = r.Type, Type = r.ResourceType.Name }).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, unusedList);
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [Route("unused")]
+        [HttpDelete]
+        public HttpResponseMessage DeleteUnusedResources([FromBody] List<ResourceModel> list)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                foreach(ResourceModel model in list)
+                {
+                    try
+                    {
+                        var resource = (from r in db.Resources where r.Id == model.Id select r).FirstOrDefault();
+                        if (resource != null)
+                        {
+                            if (services.DeleteFile(resource.Id))
+                            {
+                                db.Resources.Remove(resource);
+                            }
+                        }
+                    }
+                    catch { }
+                }
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK);
             }
         }
 

@@ -488,6 +488,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Playlist_Resource">
+          <End Role="Resource" Type="Self.Resource" Multiplicity="0..1" />
+          <End Role="Playlist" Type="Self.Playlist" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Resource">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Playlist">
+              <PropertyRef Name="Photo" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_Playlist_User">
           <End Role="User" Type="Self.User" Multiplicity="1" />
           <End Role="Playlist" Type="Self.Playlist" Multiplicity="*" />
@@ -854,6 +866,10 @@
             <End Role="User" EntitySet="User" />
             <End Role="Notification" EntitySet="Notification" />
           </AssociationSet>
+          <AssociationSet Name="FK_Playlist_Resource" Association="Self.FK_Playlist_Resource">
+            <End Role="Resource" EntitySet="Resource" />
+            <End Role="Playlist" EntitySet="Playlist" />
+          </AssociationSet>
           <AssociationSet Name="FK_Playlist_User" Association="Self.FK_Playlist_User">
             <End Role="User" EntitySet="User" />
             <End Role="Playlist" EntitySet="Playlist" />
@@ -1054,6 +1070,7 @@
           <NavigationProperty Name="PlaylistComments" Relationship="Self.FK_PlaylistComments_Playlist" FromRole="Playlist" ToRole="PlaylistComments" />
           <NavigationProperty Name="PlaylistViews" Relationship="Self.FK_PlaylistViews_Playlist" FromRole="Playlist" ToRole="PlaylistViews" />
           <NavigationProperty Name="Songs" Relationship="Self.PlaylistSongs" FromRole="Playlist" ToRole="Song" />
+          <NavigationProperty Name="Resource" Relationship="OnlineMusicModel.FK_Playlist_Resource" FromRole="Playlist" ToRole="Resource" />
         </EntityType>
         <EntityType Name="PlaylistComment">
           <Key>
@@ -1116,6 +1133,7 @@
           <NavigationProperty Name="ResourceType" Relationship="Self.FK_Resource_ResourceType" FromRole="Resource" ToRole="ResourceType" />
           <NavigationProperty Name="Songs" Relationship="Self.FK_Song_Resource" FromRole="Resource" ToRole="Song" />
           <NavigationProperty Name="UserInfoes" Relationship="Self.FK_UserInfo_Resource" FromRole="Resource" ToRole="UserInfo" />
+          <NavigationProperty Name="Playlists" Relationship="OnlineMusicModel.FK_Playlist_Resource" FromRole="Resource" ToRole="Playlist" />
         </EntityType>
         <EntityType Name="ResourceType">
           <Key>
@@ -1750,6 +1768,10 @@
             <End Role="User" EntitySet="Users" />
             <End Role="Score" EntitySet="Scores" />
           </AssociationSet>
+          <AssociationSet Name="FK_Playlist_Resource" Association="OnlineMusicModel.FK_Playlist_Resource">
+            <End Role="Resource" EntitySet="Resources" />
+            <End Role="Playlist" EntitySet="Playlists" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="Score">
           <Key>
@@ -1769,6 +1791,18 @@
             </Principal>
             <Dependent Role="Score">
               <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Playlist_Resource">
+          <End Type="OnlineMusicModel.Resource" Role="Resource" Multiplicity="0..1" />
+          <End Type="OnlineMusicModel.Playlist" Role="Playlist" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Resource">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Playlist">
+              <PropertyRef Name="Photo" />
             </Dependent>
           </ReferentialConstraint>
         </Association>

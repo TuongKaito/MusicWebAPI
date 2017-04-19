@@ -130,6 +130,19 @@ namespace OnlineMusicServices.API.Storage
             return stream;
         }
 
+        public bool DeleteFile(string id)
+        {
+            try
+            {
+                driveService.Files.Delete(id).Execute();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public async System.Threading.Tasks.Task<MemoryStream> Stream(string id)
         {
             var bytes = await driveService.HttpClient.GetByteArrayAsync($"https://www.googleapis.com/drive/v3/files/{id}?alt=media");

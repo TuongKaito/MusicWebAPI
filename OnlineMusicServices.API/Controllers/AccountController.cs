@@ -3,6 +3,7 @@ using OnlineMusicServices.API.Storage;
 using OnlineMusicServices.API.Utility;
 using OnlineMusicServices.Data;
 using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
@@ -49,14 +50,25 @@ namespace OnlineMusicServices.API.Controllers
         [Authorize(Roles = "Admin")]
         [Route("")]
         [HttpGet]
-        public HttpResponseMessage GetAllAccounts(int page = 1, int size = 200)
+        public HttpResponseMessage GetAllAccounts(int page = 1, int size = 200, string orderby = "username")
         {
             using (var db = new OnlineMusicEntities())
             {
-                var listUsers = (from u in db.Users
+                IEnumerable<UserModel> listUsers;
+                if (orderby.ToLower() == "id")
+                {
+                    listUsers = (from u in db.Users
+                                 where u.RoleId != (int)RoleManager.Admin
+                                 orderby u.Id descending
+                                 select new UserModel { User = u }).Skip((page - 1) * size).Take(size).ToList();
+                }
+                else
+                {
+                    listUsers = (from u in db.Users
                                  where u.RoleId != (int)RoleManager.Admin
                                  orderby u.Username
                                  select new UserModel { User = u }).Skip((page - 1) * size).Take(size).ToList();
+                }
                 return Request.CreateResponse(HttpStatusCode.OK, listUsers);
             }
         }
@@ -117,6 +129,7 @@ namespace OnlineMusicServices.API.Controllers
                         db.SaveChanges();
 
                         var userInfo = new UserInfo();
+                        userInfo.FullName = newUser.Username;
                         userInfo.UserId = newUser.Id;
                         if (newUser.RoleId == (int)RoleManager.Admin)
                         {

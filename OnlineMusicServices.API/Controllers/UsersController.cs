@@ -22,7 +22,6 @@ namespace OnlineMusicServices.API.Controllers
         UserInfoDTO dto;
         PlaylistDTO playlistDto;
         SongDTO songDto;
-        string domainHosting;
 
         public UsersController()
         {

@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineMusicServices.API", "OnlineMusicServices.API\OnlineMusicServices.API.csproj", "{A7A23327-4F55-4F6A-8850-9E5C2AFE7AB9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineMusicServices.Data", "OnlineMusicServices.Data\OnlineMusicServices.Data.csproj", "{9EFDAB73-6599-4F02-87B8-6BB7FAD504FC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A7A23327-4F55-4F6A-8850-9E5C2AFE7AB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7A23327-4F55-4F6A-8850-9E5C2AFE7AB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7A23327-4F55-4F6A-8850-9E5C2AFE7AB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7A23327-4F55-4F6A-8850-9E5C2AFE7AB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EFDAB73-6599-4F02-87B8-6BB7FAD504FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EFDAB73-6599-4F02-87B8-6BB7FAD504FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EFDAB73-6599-4F02-87B8-6BB7FAD504FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EFDAB73-6599-4F02-87B8-6BB7FAD504FC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

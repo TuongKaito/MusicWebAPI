@@ -651,7 +651,7 @@ namespace OnlineMusicServices.API.Controllers
         /// <param name="id"></param>
         /// <param name="lyricModel"></param>
         /// <returns></returns>
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "Admin")]
         [Route("{id}/lyrics")]
         [HttpPut]
         public HttpResponseMessage UpdateLyric([FromUri] long id, [FromBody] LyricModel lyricModel)
