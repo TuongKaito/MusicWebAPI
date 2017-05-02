@@ -46,6 +46,23 @@ namespace OnlineMusicServices.API.Controllers
             }
         }
         
+        [Authorize(Roles = "Admin")]
+        [Route("{id}/admin")]
+        [HttpGet]
+        public HttpResponseMessage GetAlbumInAdmin([FromUri] int id)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                var query = dto.GetAlbumQuery(db, null, true);
+                var album = query.Where(a => a.Id == id).FirstOrDefault();
+                if (album == null)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Không tìm thấy album id=" + id);
+                }
+                return Request.CreateResponse(HttpStatusCode.OK, album);
+            }
+        }
+
         [Route("{id}")]
         [HttpGet]
         public HttpResponseMessage GetAlbum([FromUri] int id)
