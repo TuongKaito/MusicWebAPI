@@ -58,7 +58,7 @@ namespace OnlineMusicServices.API.Controllers
                     return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Resource type not supported");
                 }
                 ICollection<SongModel> listSongs;
-                listSongs = query.ToList();
+                listSongs = query.OrderByDescending(s => s.UploadedDate).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, listSongs);
             }
         }
@@ -634,6 +634,38 @@ namespace OnlineMusicServices.API.Controllers
         #endregion Ranking Song
 
         #region Lyrics of Song
+
+        /// <summary>
+        /// Get all lyrics both verified and unverified and only admin
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin")]
+        [Route("{id}/lyrics/admin")]
+        [HttpGet]
+        public HttpResponseMessage GetAllLyrics([FromUri] long id)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                var song = (from s in db.Songs
+                            where s.Id == id
+                            select s).FirstOrDefault();
+                if (song == null)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Không tìm thấy bài hát id=" + id);
+                }
+                var listLyrics = (from l in db.Lyrics
+                                  where l.SongId == id
+                                  select new LyricModel() { LyricEntity = l, User = new UserModel() { User = l.User } }).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, listLyrics);
+            }
+        }
+
+        /// <summary>
+        /// Get all lyrics which verified
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [Route("{id}/lyrics")]
         [HttpGet]
         public HttpResponseMessage GetLyrics([FromUri] long id)

@@ -17,9 +17,17 @@ namespace OnlineMusicServices.API.DTO
             artistDto = new ArtistDTO(uri);
         }
 
-        public IQueryable<AlbumModel> GetAlbumQuery(OnlineMusicEntities db, System.Linq.Expressions.Expression<Func<Album, bool>> whereClause = null)
+        public IQueryable<AlbumModel> GetAlbumQuery(OnlineMusicEntities db, System.Linq.Expressions.Expression<Func<Album, bool>> whereClause = null, bool includeEmpty = false)
         {
-            IQueryable<Album> query = db.Albums.Where(album => album.Songs.Count > 0);
+            IQueryable<Album> query;
+            if (includeEmpty)
+            {
+                query = db.Albums;
+            }
+            else
+            {
+                query = db.Albums.Where(album => album.Songs.Count > 0);
+            }
             if (whereClause != null)
             {
                 query = query.Where(whereClause);

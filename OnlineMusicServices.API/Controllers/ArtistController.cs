@@ -41,7 +41,7 @@ namespace OnlineMusicServices.API.Controllers
             {
                 var query = dto.GetArtistQuery(db);
                 IEnumerable<ArtistModel> listArtists;
-                listArtists = query.ToList();
+                listArtists = query.OrderByDescending(a => a.Id).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, listArtists);
             }
         }

@@ -50,7 +50,7 @@ namespace OnlineMusicServices.API.Controllers
         [Authorize(Roles = "Admin")]
         [Route("")]
         [HttpGet]
-        public HttpResponseMessage GetAllAccounts(int page = 1, int size = 0, string orderby = "username")
+        public HttpResponseMessage GetAllAccounts(int page = 1, int size = 0, string orderby = "id")
         {
             using (var db = new OnlineMusicEntities())
             {
@@ -203,6 +203,12 @@ namespace OnlineMusicServices.API.Controllers
 
                     if (user != null)
                     {
+                        // Prevent if user is blocked
+                        if (user.Blocked)
+                        {
+                            return Request.CreateResponse(HttpStatusCode.Forbidden);
+                        }
+
                         MemoryCacher cache = new MemoryCacher();
                         string cachePassword = cache.Get(user.Username) != null ? (string)cache.Get(user.Username) : String.Empty;
                         success = HashingPassword.ValidatePassword(userLogin.Password, user.Password);

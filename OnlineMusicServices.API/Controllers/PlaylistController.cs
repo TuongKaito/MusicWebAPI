@@ -40,7 +40,7 @@ namespace OnlineMusicServices.API.Controllers
             using (var db = new OnlineMusicEntities())
             {
                 var query = dto.GetPlaylistQuery(db);
-                var listPlaylists = query.ToList();
+                var listPlaylists = query.OrderByDescending(pl => pl.Id).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, listPlaylists);
             }
         }
