@@ -64,36 +64,60 @@ namespace OnlineMusicServices.API.Controllers
 
         [Route("pager")]
         [HttpGet]
-        public HttpResponseMessage GetPagingAlbums(int page = 1, int size = 200)
+        public HttpResponseMessage GetPagingAlbums(int page = 1, int size = 0)
         {
             using (var db = new OnlineMusicEntities())
             {
                 var query = dto.GetAlbumQuery(db, album => album.Songs.Count > 0);
-                var listAlbums = query.OrderBy(a => a.Title).Skip((page - 1) * size).Take(size).ToList();
+                List<AlbumModel> listAlbums;
+                if (size > 0)
+                {
+                    listAlbums = query.OrderBy(a => a.Title).Skip((page - 1) * size).Take(size).ToList();
+                }
+                else
+                {
+                    listAlbums = query.OrderBy(a => a.Title).ToList();
+                }
                 return Request.CreateResponse(HttpStatusCode.OK, listAlbums);
             }
         }
 
         [Route("latest")]
         [HttpGet]
-        public HttpResponseMessage GetLatestAlbums(int page = 1, int size = 200)
+        public HttpResponseMessage GetLatestAlbums(int page = 1, int size = 0)
         {
             using (var db = new OnlineMusicEntities())
             {
                 var query = dto.GetAlbumQuery(db);
-                var listAlbums = query.OrderByDescending(a => a.ReleasedDate).Skip((page - 1) * size).Take(size).ToList();
+                List<AlbumModel> listAlbums;
+                if (size > 0)
+                {
+                    listAlbums = query.OrderByDescending(a => a.ReleasedDate).Skip((page - 1) * size).Take(size).ToList();
+                }
+                else
+                {
+                    listAlbums = query.OrderByDescending(a => a.ReleasedDate).ToList();
+                }
                 return Request.CreateResponse(HttpStatusCode.OK, listAlbums);
             }
         }
 
         [Route("popular")]
         [HttpGet]
-        public HttpResponseMessage GetPopularAlbums(int page = 1, int size = 200)
+        public HttpResponseMessage GetPopularAlbums(int page = 1, int size = 0)
         {
             using (var db = new OnlineMusicEntities())
             {
                 var query = dto.GetAlbumQuery(db);
-                var listAlbums = query.OrderByDescending(a => a.Views).Skip((page - 1) * size).Take(size).ToList();
+                List<AlbumModel> listAlbums;
+                if (size > 0)
+                {
+                    listAlbums = query.OrderByDescending(a => a.Views).Skip((page - 1) * size).Take(size).ToList();
+                }
+                else
+                {
+                    listAlbums = query.OrderByDescending(a => a.Views).ToList();
+                }
                 return Request.CreateResponse(HttpStatusCode.OK, listAlbums);
             }
         }
@@ -215,8 +239,10 @@ namespace OnlineMusicServices.API.Controllers
                             var folderId = services.SearchFolder(album.Artist.FullName, GoogleDriveServices.ALBUMS) ??
                                 services.CreateFolder(album.Artist.FullName, GoogleDriveServices.ALBUMS);
 
+                            Stream scaledImge = ImageFactory.Resize(file.InputStream);
+
                             // Photo will upload in Images/Albums/{artistFullName}/{fileName}
-                            var resourceId = services.UploadFile(file.InputStream, fileName, Media.GetMediaTypeFromExtension(ext), folderId);
+                            var resourceId = services.UploadFile(scaledImge, fileName, Media.GetMediaTypeFromExtension(ext), folderId);
                             if (resourceId == null)
                             {
                                 transaction.Rollback();
@@ -366,7 +392,7 @@ namespace OnlineMusicServices.API.Controllers
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Không tìm thấy album id=" + id);
                 }
-                var listSongs = songDto.ConvertToSongModel(album.Songs);
+                var listSongs = songDto.ConvertToSongModel(album.Songs.Where(s => s.Verified == true && s.Privacy == false && s.Official == true).ToList());
                 return Request.CreateResponse(HttpStatusCode.OK, listSongs);
             }
         }

@@ -15,7 +15,7 @@ namespace OnlineMusicServices.API.DTO
         public PlaylistDTO(Uri uri)
         {
             // Setting the url to get image
-            DomainHosting = $"{uri.Scheme}://{uri.Authority}/api/resources/streaming/";
+            DomainHosting = $"{uri.Scheme}://{uri.DnsSafeHost}/api/resources/streaming/";
         }
 
         public IQueryable<PlaylistModel> GetPlaylistQuery(OnlineMusicEntities db, System.Linq.Expressions.Expression<Func<Playlist, bool>> whereClause = null)
@@ -39,7 +39,8 @@ namespace OnlineMusicServices.API.DTO
                 CreatedDate = pl.CreatedDate,
                 UserId = pl.UserId,
                 Views = (from v in pl.PlaylistViews select v.Views).FirstOrDefault(),
-                Photo = DomainHosting + pl.Photo,
+                Photo = pl.Photo,
+                PhotoUrl = DomainHosting + pl.Photo,
                 User = new UserModel { User = pl.User }
             };
         }

@@ -87,7 +87,7 @@ namespace OnlineMusicServices.API.Controllers
 
         [Route("resources")]
         [HttpGet]
-        public HttpResponseMessage GetResourcesByGenre(int genre = 1)
+        public HttpResponseMessage GetResourcesByGenre(int genre)
         {
             using (OnlineMusicEntities db = new OnlineMusicEntities())
             {

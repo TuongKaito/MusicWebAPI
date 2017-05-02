@@ -133,13 +133,15 @@ namespace OnlineMusicServices.API.Controllers
                         {
                             #region Upload file to drive
                             // Setup photo uploaded path
-                            var ext = Path.GetExtension(file.FileName).ToLower();
-                            var fileName = user.FullName + ext;
-                            var folderId = services.SearchFolder(user.User.Username, GoogleDriveServices.AVATARS) ??
+                            string ext = Path.GetExtension(file.FileName).ToLower();
+                            string fileName = user.FullName + ext;
+                            string folderId = services.SearchFolder(user.User.Username, GoogleDriveServices.AVATARS) ??
                                 services.CreateFolder(user.User.Username, GoogleDriveServices.AVATARS);
 
+                            Stream scaledImage = ImageFactory.Resize(file.InputStream);
+
                             // Photo will upload in Images/Avatars/{username}/{fileName}
-                            var resourceId = services.UploadFile(file.InputStream, fileName, Media.GetMediaTypeFromExtension(ext), folderId);
+                            string resourceId = services.UploadFile(scaledImage, fileName, Media.GetMediaTypeFromExtension(ext), folderId);
                             if (resourceId == null)
                             {
                                 transaction.Rollback();

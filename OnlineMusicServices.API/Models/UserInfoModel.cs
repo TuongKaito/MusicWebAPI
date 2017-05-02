@@ -1,8 +1,5 @@
 ﻿using OnlineMusicServices.Data;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace OnlineMusicServices.API.Models
 {
@@ -15,6 +12,7 @@ namespace OnlineMusicServices.API.Models
         public DateTime? DateOfBirth { get; set; }
         public string City { get; set; }
         public string Avatar { get; set; }
+        public string AvatarUrl { get; set; }
         public long Followers { get; set; }
         
         public UserInfo UserInfo

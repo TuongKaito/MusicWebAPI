@@ -41,7 +41,6 @@ namespace OnlineMusicServices.API.Scheduler
             try
             {
                 writer.WriteLine(DateTime.Now.ToString() + "\t" + text);
-                writer.Close();
             }
             catch
             {

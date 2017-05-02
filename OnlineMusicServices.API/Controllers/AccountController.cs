@@ -50,26 +50,38 @@ namespace OnlineMusicServices.API.Controllers
         [Authorize(Roles = "Admin")]
         [Route("")]
         [HttpGet]
-        public HttpResponseMessage GetAllAccounts(int page = 1, int size = 200, string orderby = "username")
+        public HttpResponseMessage GetAllAccounts(int page = 1, int size = 0, string orderby = "username")
         {
             using (var db = new OnlineMusicEntities())
             {
-                IEnumerable<UserModel> listUsers;
+                var identity = (ClaimsIdentity)User.Identity;
+                IEnumerable<User> query;
+                // First does not select Administrator
                 if (orderby.ToLower() == "id")
                 {
-                    listUsers = (from u in db.Users
-                                 where u.RoleId != (int)RoleManager.Admin
-                                 orderby u.Id descending
-                                 select new UserModel { User = u }).Skip((page - 1) * size).Take(size).ToList();
+                    query = db.Users.Where(u => u.RoleId != (int)RoleManager.Administrator)
+                        .OrderByDescending(u => u.Id).AsEnumerable();
                 }
                 else
                 {
-                    listUsers = (from u in db.Users
-                                 where u.RoleId != (int)RoleManager.Admin
-                                 orderby u.Username
-                                 select new UserModel { User = u }).Skip((page - 1) * size).Take(size).ToList();
+                    query = db.Users.Where(u => u.RoleId != (int)RoleManager.Administrator)
+                        .OrderBy(u => u.Username).AsEnumerable();
                 }
-                return Request.CreateResponse(HttpStatusCode.OK, listUsers);
+                // If claim does not contain Administrator then except that role Admin
+                if (!identity.Claims.Any(c => c.Value == "Administrator"))
+                {
+                    query = query.Where(u => u.RoleId != (int)RoleManager.Admin).AsEnumerable();
+                }
+                List<UserModel> userList;
+                if (size > 0)
+                {
+                    userList = query.Skip((page - 1) * size).Take(size).Select(u => new UserModel() { User = u }).ToList();
+                }
+                else
+                {
+                    userList = query.Select(u => new UserModel { User = u }).ToList();
+                }
+                return Request.CreateResponse(HttpStatusCode.OK, userList);
             }
         }
 
@@ -85,10 +97,14 @@ namespace OnlineMusicServices.API.Controllers
         {
             using (var db = new OnlineMusicEntities())
             {
+                var identity = (ClaimsIdentity)User.Identity;
                 var user = (from u in db.Users
-                            where u.Id == id
+                            where u.Id == id && u.RoleId != (int)RoleManager.Administrator
                             select new UserModel { User = u }).FirstOrDefault();
-
+                if (!identity.Claims.Any(c => c.Value == "Administrator") && user.RoleId == (int)RoleManager.Admin)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Account Authorized!");
+                }
                 if (user != null)
                 {
                     return Request.CreateResponse(HttpStatusCode.OK, user);
@@ -295,6 +311,7 @@ namespace OnlineMusicServices.API.Controllers
             {
                 using (var db = new OnlineMusicEntities())
                 {
+                    var identity = (ClaimsIdentity)User.Identity;
                     var user = (from u in db.Users
                                 where u.Id == userLogin.Id
                                 select u).FirstOrDefault();
@@ -302,10 +319,16 @@ namespace OnlineMusicServices.API.Controllers
                     {
                         return Request.CreateErrorResponse(HttpStatusCode.NotFound, $"Tài khoản với id={userLogin.Id} không tồn tại");
                     }
+                    else if (user.RoleId == (int)RoleManager.Administrator)
+                    {
+                        return Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Denied Access!");
+                    }
                     else
                     {
                         user.Blocked = userLogin.Blocked;
-                        user.RoleId = userLogin.RoleId;
+                        // Only Administrator could change user's role
+                        if (identity.Claims.Any(c => c.Value == "Administrator"))
+                            user.RoleId = userLogin.RoleId;
                         db.SaveChanges();
                         return Request.CreateResponse(HttpStatusCode.OK);
                     }

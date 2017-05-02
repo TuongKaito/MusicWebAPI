@@ -4,11 +4,9 @@ using OnlineMusicServices.API.Storage;
 using OnlineMusicServices.API.Utility;
 using OnlineMusicServices.Data;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace OnlineMusicServices.API.Security
 {
@@ -36,19 +34,25 @@ namespace OnlineMusicServices.API.Security
                 {
                     var identity = new ClaimsIdentity(context.Options.AuthenticationType);
                     identity.AddClaim(new Claim(ClaimTypes.Name, user.Id.ToString()));
-                    if (user.RoleId == (int)RoleManager.Admin)
+                    if (user.RoleId == (int)RoleManager.Administrator)
+                    {
+                        identity.AddClaim(new Claim(ClaimTypes.Role, "Administrator"));
+                        identity.AddClaim(new Claim(ClaimTypes.Role, "Admin"));
+                        identity.AddClaim(new Claim(ClaimTypes.Role, "User"));
+                    }
+                    else if (user.RoleId == (int)RoleManager.Admin)
                     {
                         identity.AddClaim(new Claim(ClaimTypes.Role, "Admin"));
+                        identity.AddClaim(new Claim(ClaimTypes.Role, "User"));
+                    }
+                    else if (user.RoleId == (int)RoleManager.VIP)
+                    {
+                        identity.AddClaim(new Claim(ClaimTypes.Role, "VIP"));
                         identity.AddClaim(new Claim(ClaimTypes.Role, "User"));
                     }
                     else if (user.RoleId == (int)RoleManager.User)
                     {
                         identity.AddClaim(new Claim(ClaimTypes.Role, "User"));
-                    }
-                    else if (user.RoleId == (int)RoleManager.VIP)
-                    {
-                        identity.AddClaim(new Claim(ClaimTypes.Role, "User"));
-                        identity.AddClaim(new Claim(ClaimTypes.Role, "VIP"));
                     }
                     else
                     {

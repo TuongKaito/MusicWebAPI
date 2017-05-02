@@ -14,7 +14,7 @@ namespace OnlineMusicServices.API.DTO
         
         public ArtistDTO(Uri uri)
         {
-            DomainHosting = $"{uri.Scheme}://{uri.Authority}/api/resources/streaming/";
+            DomainHosting = $"{uri.Scheme}://{uri.DnsSafeHost}/api/resources/streaming/";
         }
 
         public IQueryable<ArtistModel> GetArtistQuery(OnlineMusicEntities db, Expression<Func<Artist, bool>> whereClause = null)
@@ -46,7 +46,8 @@ namespace OnlineMusicServices.API.DTO
                 DateOfBirth = a.DateOfBirth,
                 City = a.City,
                 Profile = a.Profile,
-                Photo = DomainHosting + a.Photo,
+                Photo = a.Photo,
+                PhotoUrl = DomainHosting + a.Photo,
                 Verified = a.Verified,
                 Followers = a.Users.Count
             };

@@ -46,6 +46,9 @@ namespace OnlineMusicServices.API.Models
         [DataMember]
         public string Photo { get; set; }
 
+        [DataMember]
+        public string PhotoUrl { get; set; }
+
         public Album Album
         {
             set

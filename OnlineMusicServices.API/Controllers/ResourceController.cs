@@ -51,10 +51,23 @@ namespace OnlineMusicServices.API.Controllers
                     mediaType = "video/mp4";
                 }
 
-                if (Request.Headers.Range != null)
+                RangeHeaderValue range = Request.Headers.Range;
+
+                if (range != null)
                 {
                     try
                     {
+                        // Convert percent to bytes
+                        if (range.Unit == "percent" && range.Ranges.Count > 0)
+                        {
+                            Request.Headers.Range.Unit = "bytes";
+                            var value = range.Ranges.First();
+                            long? from = value.From != null ? stream.Length * value.From / 100 : null;
+                            long? to = value.To != null ? stream.Length * value.To / 100 : null;
+                            RangeItemHeaderValue newValue = new RangeItemHeaderValue(from, to);
+                            Request.Headers.Range.Ranges.Remove(value);
+                            Request.Headers.Range.Ranges.Add(newValue);
+                        }
                         HttpResponseMessage partialResponse = Request.CreateResponse(HttpStatusCode.PartialContent);
                         partialResponse.Content = new ByteRangeStreamContent(stream, Request.Headers.Range, mediaType);
                         return partialResponse;

@@ -13,7 +13,7 @@ namespace OnlineMusicServices.API.DTO
 
         public UserInfoDTO(Uri uri)
         {
-            DomainHosting = $"{uri.Scheme}://{uri.Authority}/api/resources/streaming/";
+            DomainHosting = $"{uri.Scheme}://{uri.DnsSafeHost}/api/resources/streaming/";
         }
 
         public IQueryable<UserInfoModel> GetUserInfoQuery(OnlineMusicEntities db, System.Linq.Expressions.Expression<Func<UserInfo, bool>> whereClause = null)
@@ -44,7 +44,8 @@ namespace OnlineMusicServices.API.DTO
                 DateOfBirth = i.DateOfBirth,
                 City = i.City,
                 Followers = i.User.User1.Count,
-                Avatar = DomainHosting + i.Avatar
+                Avatar = i.Avatar,
+                AvatarUrl = DomainHosting + i.Avatar
             };
         }
     }

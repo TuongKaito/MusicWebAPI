@@ -63,38 +63,63 @@ namespace OnlineMusicServices.API.Controllers
 
         [Route("pager")]
         [HttpGet]
-        public HttpResponseMessage GetPagingPlaylists(int page = 1, int size = 200)
+        public HttpResponseMessage GetPagingPlaylists(int page = 1, int size = 0)
         {
             using (var db = new OnlineMusicEntities())
             {
                 var query = dto.GetPlaylistQuery(db, playlist => playlist.Songs.Count > 0);
-                var listPlaylists = query.OrderBy(pl => pl.Title).Skip((page - 1) * size).Take(size).ToList();
+                List<PlaylistModel> listPlaylists;
+                if (size > 0)
+                {
+                    listPlaylists = query.OrderBy(pl => pl.Title).Skip((page - 1) * size).Take(size).ToList();
+                }
+                else
+                {
+                    listPlaylists = query.OrderBy(pl => pl.Title).ToList();
+                }
                 return Request.CreateResponse(HttpStatusCode.OK, listPlaylists);
             }
         }
 
         [Route("latest")]
         [HttpGet]
-        public HttpResponseMessage GetLatestPlaylists(int page = 1, int size = 200)
+        public HttpResponseMessage GetLatestPlaylists(int page = 1, int size = 0)
         {
             using (var db = new OnlineMusicEntities())
             {
                 var query = dto.GetPlaylistQuery(db, playlist => playlist.Songs.Count > 0);
-                var listPlaylists = query.OrderByDescending(pl => pl.CreatedDate)
+                List<PlaylistModel> listPlaylists;
+                if (size > 0)
+                {
+                    listPlaylists = query.OrderByDescending(pl => pl.CreatedDate)
                                          .ThenByDescending(pl => pl.Id)
                                          .Skip((page - 1) * size).Take(size).ToList();
+                }
+                else
+                {
+                    listPlaylists = query.OrderByDescending(pl => pl.CreatedDate)
+                                         .ThenByDescending(pl => pl.Id).ToList();
+                }
                 return Request.CreateResponse(HttpStatusCode.OK, listPlaylists);
             }
         }
 
         [Route("popular")]
         [HttpGet]
-        public HttpResponseMessage GetPopularPlaylists(int page = 1, int size = 200)
+        public HttpResponseMessage GetPopularPlaylists(int page = 1, int size = 0)
         {
             using (var db = new OnlineMusicEntities())
             {
                 var query = dto.GetPlaylistQuery(db, playlist => playlist.Songs.Count > 0);
-                var listPlaylists = query.OrderByDescending(pl => pl.Views).Skip((page - 1) * size).Take(size).ToList();
+                List<PlaylistModel> listPlaylists;
+                if (size > 0)
+                {
+                    listPlaylists = query.OrderByDescending(pl => pl.Views).Skip((page - 1) * size).Take(size).ToList();
+                }
+                else
+                {
+                    listPlaylists = query.OrderByDescending(pl => pl.Views).ToList();
+                }
                 return Request.CreateResponse(HttpStatusCode.OK, listPlaylists);
             }
         }
@@ -157,8 +182,10 @@ namespace OnlineMusicServices.API.Controllers
                             var folderId = services.SearchFolder(playlist.User.Username, GoogleDriveServices.PLAYLISTS) ??
                                 services.CreateFolder(playlist.User.Username, GoogleDriveServices.PLAYLISTS);
 
+                            Stream scaledImage = ImageFactory.Resize(file.InputStream);
+
                             // Photo will upload in Images/Playlists/{username}/{fileName}
-                            var resourceId = services.UploadFile(file.InputStream, fileName, Media.GetMediaTypeFromExtension(ext), folderId);
+                            var resourceId = services.UploadFile(scaledImage, fileName, Media.GetMediaTypeFromExtension(ext), folderId);
                             if (resourceId == null)
                             {
                                 transaction.Rollback();
@@ -308,7 +335,7 @@ namespace OnlineMusicServices.API.Controllers
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Không tìm thấy playlist id=" + id);
                 }
-                var listSongs = songDto.ConvertToSongModel(playlist.Songs);
+                var listSongs = songDto.ConvertToSongModel(playlist.Songs.Where(s => s.Verified == true && s.Privacy == false).ToList());
                 return Request.CreateResponse(HttpStatusCode.OK, listSongs);
             }
         }

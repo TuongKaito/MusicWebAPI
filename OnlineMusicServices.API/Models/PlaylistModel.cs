@@ -38,6 +38,9 @@ namespace OnlineMusicServices.API.Models
         [DataMember]
         public string Photo { get; set; }
 
+        [DataMember]
+        public string PhotoUrl { get; set; }
+
         public override void UpdateEntity(Playlist playlist)
         {
             playlist.Title = Title;

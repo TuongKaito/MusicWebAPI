@@ -3,7 +3,6 @@ using OnlineMusicServices.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 namespace OnlineMusicServices.API.DTO
 {
@@ -14,7 +13,7 @@ namespace OnlineMusicServices.API.DTO
 
         public AlbumDTO(Uri uri)
         {
-            DomainHosting = $"{uri.Scheme}://{uri.Authority}/api/resources/streaming/";
+            DomainHosting = $"{uri.Scheme}://{uri.DnsSafeHost}/api/resources/streaming/";
             artistDto = new ArtistDTO(uri);
         }
 
@@ -49,7 +48,8 @@ namespace OnlineMusicServices.API.DTO
                 Artist = artistDto.Converter(a.Artist),
                 ReleasedDate = a.ReleasedDate,
                 Views = (from v in a.AlbumViews select v.Views).FirstOrDefault(),
-                Photo = DomainHosting + a.Photo
+                Photo = a.Photo,
+                PhotoUrl = DomainHosting + a.Photo
             };
         }
     }

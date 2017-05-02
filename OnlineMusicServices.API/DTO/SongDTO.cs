@@ -15,7 +15,7 @@ namespace OnlineMusicServices.API.DTO
 
         public SongDTO(Uri uri)
         {
-            DomainHosting = $"{uri.Scheme}://{uri.Authority}/api/resources/streaming/";
+            DomainHosting = $"{uri.Scheme}://{uri.DnsSafeHost}/api/resources/streaming/";
             artistDto = new ArtistDTO(uri);
         }
 

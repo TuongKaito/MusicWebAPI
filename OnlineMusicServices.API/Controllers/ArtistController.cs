@@ -72,36 +72,60 @@ namespace OnlineMusicServices.API.Controllers
         /// <returns></returns>
         [Route("pager")]
         [HttpGet]
-        public HttpResponseMessage GetPagingArtists(int page = 1, int size = 200, bool verified = true)
+        public HttpResponseMessage GetPagingArtists(int page = 1, int size = 0, bool verified = true)
         {
             using (var db = new OnlineMusicEntities())
             {
                 var query = dto.GetArtistQuery(db);
-                var listArtists = query.Where(a => a.Verified == verified).OrderBy(a => a.FullName).Skip((page - 1) * size).Take(size).ToList();
+                List<ArtistModel> listArtists;
+                if (size > 0)
+                {
+                    listArtists = query.Where(a => a.Verified == verified).OrderBy(a => a.FullName).Skip((page - 1) * size).Take(size).ToList();
+                }
+                else
+                {
+                    listArtists = query.Where(a => a.Verified == verified).OrderBy(a => a.FullName).ToList();
+                }
                 return Request.CreateResponse(HttpStatusCode.OK, listArtists);
             }
         }
 
         [Route("latest")]
         [HttpGet]
-        public HttpResponseMessage GetLatestArtists(int page = 1, int size = 200)
+        public HttpResponseMessage GetLatestArtists(int page = 1, int size = 0)
         {
             using (var db = new OnlineMusicEntities())
             {
                 var query = dto.GetArtistQuery(db);
-                var listArtists = query.Where(a => a.Verified == true).OrderByDescending(a => a.Id).Skip((page - 1) * size).Take(size).ToList();
+                List<ArtistModel> listArtists;
+                if (size > 0)
+                {
+                    listArtists = query.Where(a => a.Verified == true).OrderByDescending(a => a.Id).Skip((page - 1) * size).Take(size).ToList();
+                }
+                else
+                {
+                    listArtists = query.Where(a => a.Verified == true).OrderByDescending(a => a.Id).ToList();
+                }
                 return Request.CreateResponse(HttpStatusCode.OK, listArtists);
             }
         }
 
         [Route("famous")]
         [HttpGet]
-        public HttpResponseMessage GetFamousArtists(int page = 1, int size = 200)
+        public HttpResponseMessage GetFamousArtists(int page = 1, int size = 0)
         {
             using (var db = new OnlineMusicEntities())
             {
                 var query = dto.GetArtistQuery(db, (artist) => artist.Songs.Count > 0);
-                var listArtists = query.Where(a => a.Verified == true).OrderByDescending(a => a.Followers).Skip((page - 1) * size).Take(size).ToList();
+                List<ArtistModel> listArtists;
+                if (size > 0)
+                {
+                    listArtists = query.Where(a => a.Verified == true).OrderByDescending(a => a.Followers).Skip((page - 1) * size).Take(size).ToList();
+                }
+                else
+                {
+                    listArtists = query.Where(a => a.Verified == true).OrderByDescending(a => a.Followers).ToList();
+                }
                 return Request.CreateResponse(HttpStatusCode.OK, listArtists);
             }
         }
@@ -185,10 +209,10 @@ namespace OnlineMusicServices.API.Controllers
                                 services.CreateFolder(artist.FullName, GoogleDriveServices.ARTISTS);
 
                             // Resize image before upload
-                            var image = ImageFactory.Resize(file.InputStream);
+                            var scaledImage = ImageFactory.Resize(file.InputStream);
 
                             // Photo will upload in Images/Artists/{artistFullName}/{fileName}
-                            var resourceId = services.UploadFile(image, fileName, Media.GetMediaTypeFromExtension(ext), folderId);
+                            var resourceId = services.UploadFile(scaledImage, fileName, Media.GetMediaTypeFromExtension(ext), folderId);
                             if (resourceId == null)
                             {
                                 transaction.Rollback();
@@ -301,7 +325,7 @@ namespace OnlineMusicServices.API.Controllers
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Không tìm thấy nghệ sĩ id=" + id);
                 }
-                ICollection<SongModel> listSongs = songDto.ConvertToSongModel(artist.Songs.ToList()).OrderByDescending(s => s.Views).ToList();
+                ICollection<SongModel> listSongs = songDto.ConvertToSongModel(artist.Songs.Where(s => s.Verified == true && s.Privacy == false && s.Official == true).ToList()).OrderByDescending(s => s.Views).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, listSongs);
             }
         }

@@ -38,8 +38,9 @@ namespace OnlineMusicServices.API.Models
 
     public enum RoleManager
     {
-        Admin = 1,
-        User = 2,
-        VIP = 3
+        Administrator = 1,
+        Admin = 2,
+        VIP = 3,
+        User = 4
     }
 }

@@ -101,7 +101,7 @@ namespace OnlineMusicServices.API.Controllers
         /// <returns></returns>
         [Route("pager")]
         [HttpGet]
-        public HttpResponseMessage GetPagingSongs(int page = 1, int size = 200, bool verified = true, bool privacy = false, string type = "audio")
+        public HttpResponseMessage GetPagingSongs(int page = 1, int size = 0, bool verified = true, bool privacy = false, string type = "audio")
         {
             using (var db = new OnlineMusicEntities())
             {
@@ -118,16 +118,25 @@ namespace OnlineMusicServices.API.Controllers
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Resource type not supported");
                 }
-                var listSongs = query.Where(s => !String.IsNullOrEmpty(s.ResourceId) && s.Verified == verified && s.Privacy == privacy)
+                List<SongModel> listSongs;
+                if (size > 0)
+                {
+                    listSongs = query.Where(s => !String.IsNullOrEmpty(s.ResourceId) && s.Verified == verified && s.Privacy == privacy)
                                      .OrderBy(s => s.Title)
                                      .Skip((page - 1) * size).Take(size).ToList();
+                }
+                else
+                {
+                    listSongs = query.Where(s => !String.IsNullOrEmpty(s.ResourceId) && s.Verified == verified && s.Privacy == privacy)
+                                     .OrderBy(s => s.Title).ToList();
+                }
                 return Request.CreateResponse(HttpStatusCode.OK, listSongs);
             }
         }
 
         [Route("latest")]
         [HttpGet]
-        public HttpResponseMessage GetLatestSongs(int page = 1, int size = 200, string type = "audio")
+        public HttpResponseMessage GetLatestSongs(int page = 1, int size = 0, string type = "audio")
         {
             using (var db = new OnlineMusicEntities())
             {
@@ -144,17 +153,26 @@ namespace OnlineMusicServices.API.Controllers
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Resource type not supported");
                 }
-                var listSongs = query.Where(s => !String.IsNullOrEmpty(s.ResourceId) && s.Verified == true && s.Privacy == false)
+                List<SongModel> listSongs;
+                if (size > 0)
+                {
+                    listSongs = query.Where(s => !String.IsNullOrEmpty(s.ResourceId) && s.Verified == true && s.Privacy == false)
                                      .OrderByDescending(s => s.UploadedDate)
                                      .Skip((page - 1) * size)
                                      .Take(size).ToList();
+                }
+                else
+                {
+                    listSongs = query.Where(s => !String.IsNullOrEmpty(s.ResourceId) && s.Verified == true && s.Privacy == false)
+                                     .OrderByDescending(s => s.UploadedDate).ToList();
+                }
                 return Request.CreateResponse(HttpStatusCode.OK, listSongs);
             }
         }
 
         [Route("popular")]
         [HttpGet]
-        public HttpResponseMessage GetPopularSongs(int page = 1, int size = 200, string type = "audio")
+        public HttpResponseMessage GetPopularSongs(int page = 1, int size = 0, string type = "audio")
         {
             using (var db = new OnlineMusicEntities())
             {
@@ -171,10 +189,19 @@ namespace OnlineMusicServices.API.Controllers
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Resource type not supported");
                 }
-                var listSongs = query.Where(s => !String.IsNullOrEmpty(s.ResourceId) && s.Verified == true && s.Privacy == false)
+                List<SongModel> listSongs;
+                if (size > 0)
+                {
+                    listSongs = query.Where(s => !String.IsNullOrEmpty(s.ResourceId) && s.Verified == true && s.Privacy == false)
                                      .OrderByDescending(s => s.Views)
                                      .Skip((page - 1) * size)
                                      .Take(size).ToList();
+                }
+                else
+                {
+                    listSongs = query.Where(s => !String.IsNullOrEmpty(s.ResourceId) && s.Verified == true && s.Privacy == false)
+                                     .OrderByDescending(s => s.Views).ToList();
+                }
                 return Request.CreateResponse(HttpStatusCode.OK, listSongs);
             }
         }
@@ -484,6 +511,26 @@ namespace OnlineMusicServices.API.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
+        [Route("official")]
+        [HttpPut]
+        public HttpResponseMessage OfficialSongs([FromBody] List<SongModel> list)
+        {
+            using (var db = new OnlineMusicEntities())
+            {
+                foreach (SongModel model in list)
+                {
+                    Song song = (from s in db.Songs where s.Id == model.Id select s).FirstOrDefault();
+                    if (song != null && song.Official != model.Official)
+                    {
+                        song.Official = model.Official;
+                        db.SaveChanges();
+                    }
+                }
+                return Request.CreateResponse(HttpStatusCode.OK);
+            }
+        }
+
         [Route("{id}/increase-view")]
         [HttpPut]
         public HttpResponseMessage IncreaseView([FromUri] long id)
@@ -559,8 +606,7 @@ namespace OnlineMusicServices.API.Controllers
         {
             using (var db = new OnlineMusicEntities())
             {
-                DateTime rankingDate = new DateTime(year, month, day);
-                var rankingList = rankingSongDto.GetRankingQuery(db, r => r.StartDate.Date.Equals(rankingDate.Date)).ToList();
+                var rankingList = rankingSongDto.GetRankingQuery(db, r => r.StartDate.Year == year && r.StartDate.Month == month && r.StartDate.Day == day).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, rankingList);
             }
         }
@@ -603,7 +649,7 @@ namespace OnlineMusicServices.API.Controllers
                 }
                 var listLyrics = (from l in db.Lyrics
                                   where l.SongId == id && l.Verified == true
-                                  select new LyricModel() { LyricEntity = l }).ToList();
+                                  select new LyricModel() { LyricEntity = l, User = new UserModel() { User = l.User } }).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, listLyrics);
             }
         }

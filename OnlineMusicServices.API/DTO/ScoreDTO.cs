@@ -14,7 +14,7 @@ namespace OnlineMusicServices.API.DTO
 
         public ScoreDTO(Uri uri)
         {
-            DomainHosting = $"{uri.Scheme}://{uri.Authority}/api/resources/streaming/";
+            DomainHosting = $"{uri.Scheme}://{uri.DnsSafeHost}/api/resources/streaming/";
             userInfoDto = new UserInfoDTO(uri);
         }
 

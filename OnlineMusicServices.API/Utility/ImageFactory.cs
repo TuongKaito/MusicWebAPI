@@ -16,7 +16,8 @@ namespace OnlineMusicServices.API.Utility
             {
                 Width = IMAGE_WIDTH,
                 Height = IMAGE_HEIGHT,
-                Mode = FitMode.Stretch
+                Mode = FitMode.Stretch,
+                Scale = ScaleMode.Both
             });
             job.Build();
             return result;

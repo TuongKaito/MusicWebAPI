@@ -4,28 +4,28 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="083f7c6d9ecd428f95ed5d52c90350ff" Name="Diagram1" ZoomLevel="100">
-        <EntityTypeShape EntityType="OnlineMusicModel.Album" Width="1.5" PointX="3" PointY="17.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.AlbumComment" Width="1.5" PointX="8.25" PointY="18.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.AlbumView" Width="1.5" PointX="5.25" PointY="22.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.Artist" Width="1.5" PointX="6" PointY="17.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.Genre" Width="1.5" PointX="0.75" PointY="18.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.Lyric" Width="1.5" PointX="13.5" PointY="15.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.Notification" Width="1.5" PointX="10.5" PointY="11.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.Playlist" Width="1.5" PointX="10.5" PointY="7.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.PlaylistComment" Width="1.5" PointX="12.75" PointY="8" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.PlaylistView" Width="1.5" PointX="12.75" PointY="11.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.RankingAlbum" Width="1.5" PointX="5.25" PointY="25.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.RankingSong" Width="1.5" PointX="13.5" PointY="19.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.Resource" Width="1.5" PointX="3.75" PointY="14.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.ResourceType" Width="1.5" PointX="1.5" PointY="14.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.Role" Width="1.5" PointX="6" PointY="13.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.Song" Width="1.5" PointX="11.25" PointY="17.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.SongComment" Width="1.5" PointX="16.5" PointY="15.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.SongView" Width="1.5" PointX="13.5" PointY="26.25" IsExpanded="true" />
+      <Diagram DiagramId="083f7c6d9ecd428f95ed5d52c90350ff" Name="Diagram1" ZoomLevel="96">
+        <EntityTypeShape EntityType="OnlineMusicModel.Album" Width="1.5" PointX="12.625" PointY="8.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.AlbumComment" Width="1.5" PointX="10.25" PointY="8.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.AlbumView" Width="1.5" PointX="14.5" PointY="12.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.Artist" Width="1.5" PointX="8.25" PointY="8.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.Genre" Width="1.5" PointX="10.625" PointY="12.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.Lyric" Width="1.5" PointX="8.375" PointY="12.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.Notification" Width="1.5" PointX="3.125" PointY="8.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.Playlist" Width="1.5" PointX="5.5" PointY="17.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.PlaylistComment" Width="2" PointX="2.75" PointY="17" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.PlaylistView" Width="1.5" PointX="8.625" PointY="17.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.RankingAlbum" Width="1.5" PointX="14.875" PointY="8.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.RankingSong" Width="1.5" PointX="12.875" PointY="16.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.Resource" Width="1.5" PointX="14.875" PointY="17.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.ResourceType" Width="1.5" PointX="14.875" PointY="15.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.Role" Width="1.5" PointX="3.125" PointY="11.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.Song" Width="1.5" PointX="10.625" PointY="15" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.SongComment" Width="1.5" PointX="8.375" PointY="15.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.SongView" Width="1.5" PointX="12.875" PointY="13.875" IsExpanded="true" />
         <EntityTypeShape EntityType="OnlineMusicModel.sysdiagram" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.User" Width="1.5" PointX="8.25" PointY="12.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnlineMusicModel.UserInfo" Width="1.5" PointX="15.5" PointY="12.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.User" Width="1.5" PointX="6" PointY="12.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineMusicModel.UserInfo" Width="1.5" PointX="2.75" PointY="13.75" IsExpanded="true" />
         <AssociationConnector Association="OnlineMusicModel.FK_Album_Artist" ManuallyRouted="false" />
         <AssociationConnector Association="OnlineMusicModel.FK_Album_Genre" ManuallyRouted="false" />
         <AssociationConnector Association="OnlineMusicModel.FK_Album_Resource" ManuallyRouted="false" />
@@ -58,7 +58,7 @@
         <AssociationConnector Association="OnlineMusicModel.FollowerUser" ManuallyRouted="false" />
         <AssociationConnector Association="OnlineMusicModel.PlaylistSongs" ManuallyRouted="false" />
         <AssociationConnector Association="OnlineMusicModel.SongArtists" ManuallyRouted="false" />
-        <EntityTypeShape EntityType="OnlineMusicModel.Score" Width="1.5" PointX="10.5" PointY="4.75" />
+        <EntityTypeShape EntityType="OnlineMusicModel.Score" Width="1.5" PointX="5.625" PointY="8.625" />
         <AssociationConnector Association="OnlineMusicModel.FK_Score_User" />
         <AssociationConnector Association="OnlineMusicModel.FK_Playlist_Resource" />
       </Diagram>
